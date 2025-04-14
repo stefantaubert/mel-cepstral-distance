@@ -22,17 +22,54 @@ sudo apt install python3-pip \
 git clone https://github.com/jasminsternkopf/mel_cepstral_distance.git
 cd mel_cepstral_distance
 # create virtual environment
-python3.8 -m pipenv install --dev
+python3.13 -m venv .venv-py13
+source .venv-py13/bin/activate
+pip install -e .[dev]
 ```
 
 ## Running the tests
 
 ```sh
-# first, install the tool (see "Development setup")
-# then, navigate into the directory of the repo
-cd mel_cepstral_distance
-# activate environment
-python3.8 -m pipenv shell
-# run tests
+coverage erase
 tox
+coverage combine
+coverage html -d coverage
+```
+
+## Calculating test coverage
+
+```sh
+mkdir coverage
+pytest \
+  --cov=src/mel_cepstral_distance \
+  --cov-report=html:coverage \
+  src/mel_cepstral_distance_tests > coverage/output.log 2>&1
+```
+
+## Running the linter
+
+```sh
+ruff check --fix
+```
+
+## Running mypy
+
+```sh
+mypy
+
+# run on tests
+mypy src/mel_cepstral_distance_tests/ \
+  --check-untyped-defs \
+  --disable-error-code "arg-type"
+```
+
+## Upload to PyPI
+```sh
+rm -rf dist/; python3.13 -m build -o dist/
+
+# upload to testpypi 
+pipenv run twine upload --repository testpypi dist/*
+
+# upload to pypi
+pipenv run twine upload --repository pypi dist/*
 ```

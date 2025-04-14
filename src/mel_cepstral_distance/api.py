@@ -1,50 +1,6 @@
-"""
-This module provides functions for processing and analyzing audio data, including
-the computation of spectrograms, extraction of Mel-Frequency Cepstral Coefficients
-(MFCCs), and calculation of the Mel-Cepstral Distance (MCD) between audio signals.
-
-Functions
----------
-- `get_amplitude_spectrogram`: Computes the Short-Time Fourier Transform (STFT)
-  of an audio signal and returns the amplitude spectrogram.
-- `get_mel_spectrogram`: Converts an amplitude spectrogram to a mel-spectrogram
-  using mel filterbanks.
-- `get_mfccs`: Extracts MFCCs from a mel-spectrogram.
-- `compare_audio_files`: Compares two audio files by calculating the MCD and
-  alignment penalty.
-- `compare_amplitude_spectrograms`: Compares two amplitude spectrograms.
-- `compare_mel_spectrograms`: Compares two mel-spectrograms.
-- `compare_mfccs`: Compares two sets of MFCCs.
-
-Features
---------
-- Silence removal at various stages of the processing pipeline.
-- Alignment of spectrograms or MFCCs using zero-padding or Dynamic Time Warping (DTW).
-- Flexible configuration of FFT parameters, mel filterbanks, and alignment strategies.
-
-Notes
------
-- The module assumes that input audio files are mono WAV files. If the audio files
-  contain multiple channels, preprocessing is required to convert them to mono.
-- For optimal performance, FFT window lengths should be powers of 2 in samples.
-- Silence removal is applied based on energy thresholds, either in the time domain
-  or at different spectral levels (e.g., mel-spectrogram or MFCCs).
-- The Mel-Cepstral Distance (MCD) is a commonly used metric for evaluating the
-  similarity between two audio signals, particularly in speech synthesis and
-  voice conversion tasks.
-
-Dependencies
-------------
-- `numpy`
-- `scipy`
-- `logging`
-- `pathlib`
-- `typing`
-"""
-
 from logging import getLogger
 from pathlib import Path
-from typing import Literal, Optional, Tuple
+from typing import Literal, Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -74,7 +30,7 @@ from mel_cepstral_distance.silence import (
 
 
 def get_amplitude_spectrogram(
-  audio: Path | str,
+  audio: Union[Path, str],
   *,
   sample_rate: Optional[int] = None,
   n_fft: float = 32,
@@ -261,7 +217,7 @@ def get_mel_spectrogram(
   remove_silence : bool, optional, default=False
     If True, removes silence from the spectrogram based on `silence_threshold`.
   silence_threshold : float, optional
-    Threshold used to detect silence when `remove_silence` is True. Must be >= 0.
+    Threshold used to detect silence when `remove_silence` is True.
 
   Returns
   -------
@@ -288,7 +244,7 @@ def get_mel_spectrogram(
   ValueError
     If the number of frequency bins in `amp_spec` does not match `n_fft` in samples.
   ValueError
-    If silence removal is enabled but `silence_threshold` is not set or is < 0.
+    If silence removal is enabled but `silence_threshold` is not set.
   """
   # amp_spec is X_km
 
@@ -371,7 +327,6 @@ def get_mfccs(
     `silence_threshold` parameter.
   silence_threshold : float, optional
     Threshold used to detect silence when `remove_silence` is True.
-    Must be >= 0 if specified.
 
   Returns
   -------
@@ -387,7 +342,7 @@ def get_mfccs(
   ValueError
     If `mel_spec` has no mel bands or frames.
   ValueError
-    If silence removal is enabled but `silence_threshold` is not set or is < 0.
+    If silence removal is enabled but `silence_threshold` is not set.
 
   Notes
   -----
@@ -428,8 +383,8 @@ def get_mfccs(
 
 
 def compare_audio_files(
-  audio_A: Path | str,
-  audio_B: Path | str,
+  audio_A: Union[Path, str],
+  audio_B: Union[Path, str],
   /,
   *,
   sample_rate: Optional[int] = None,
@@ -465,11 +420,11 @@ def compare_audio_files(
   audio_B : Path | str
       Path to the second mono WAV file.
   sample_rate : int, optional
-      If specified, both signals are resampled to this rate before processing. Otherwise,
-      the lower of the two input sample rates is used. Must be > 0.
+      If specified, both signals are resampled to this rate before processing.
+      Otherwise, the lower of the two input sample rates is used. Must be > 0.
   n_fft : float, default=32
-      FFT window length in milliseconds. Must be > 0. The corresponding number of samples
-      should be a power of 2 for efficient FFT computation.
+      FFT window length in milliseconds. Must be > 0. The corresponding number of
+      samples should be a power of 2 for efficient FFT computation.
   win_len : float, default=32
       Window length in milliseconds. Should be equal to `n_fft`. Must be > 0.
   hop_len : float, default=8
@@ -501,10 +456,9 @@ def compare_audio_files(
   silence_threshold_A : float, optional
       Threshold used to detect silence in `audio_A`, depending on the selected
       `remove_silence` strategy. For `"sig"`, this is an RMS threshold; for spectral
-      stages, it applies to frame energy or amplitude. Must be >= 0 if specified.
+      stages, it applies to frame energy or amplitude.
   silence_threshold_B : float, optional
       Same as `silence_threshold_A`, but applied to `audio_B`.
-      Must be >= 0 if specified.
   norm_audio : bool, default=True
       If True, normalizes both signals to the range [-1, 1] before processing.
   dtw_radius : int, optional, default=10
@@ -551,7 +505,7 @@ def compare_audio_files(
       If `remove_silence` is not "no", "sig", "spec", "mel", or "mfcc".
   ValueError
       If silence removal is enabled but `silence_threshold_A` or `silence_threshold_B`
-      is not set or is < 0.
+      is not set.
   ValueError
       If `dtw_radius` is specified but not >= 1.
   """
@@ -741,7 +695,6 @@ def compare_amplitude_spectrograms(
   silence_threshold_A : float, optional
       Threshold used to detect silence in `amp_spec_A`, depending on the selected
       `remove_silence` strategy. For "spec", this applies to frame energy or amplitude.
-      Must be >= 0 if specified.
   silence_threshold_B : float, optional
       Same as `silence_threshold_A`, but applied to `amp_spec_B`.
   dtw_radius : int, optional, default=10
@@ -781,7 +734,7 @@ def compare_amplitude_spectrograms(
       If `dtw_radius` is specified but not >= 1.
   ValueError
       If silence removal is enabled but `silence_threshold_A` or `silence_threshold_B`
-      is not set or is < 0.
+      is not set.
   """
   if len(amp_spec_A.shape) != 2:
     raise ValueError(
@@ -960,7 +913,7 @@ def compare_mel_spectrograms(
       before alignment.
   silence_threshold_A : float, optional
       Threshold used to detect silence in `mel_spec_A`, depending on the selected
-      `remove_silence` strategy. Must be >= 0 if specified.
+      `remove_silence` strategy.
   silence_threshold_B : float, optional
       Same as `silence_threshold_A`, but applied to `mel_spec_B`.
   dtw_radius : int, optional, default=10
@@ -993,7 +946,7 @@ def compare_mel_spectrograms(
       If `align_target` is not 'mel' or 'mfcc'.
   ValueError
       If silence removal is enabled but `silence_threshold_A` or `silence_threshold_B`
-      is not set or is < 0.
+      is not set.
   ValueError
       If `dtw_radius` is specified but not >= 1.
 
@@ -1146,9 +1099,9 @@ def compare_mfccs(
       If True, removes silence from the MFCCs based on the `silence_threshold_A`
       and `silence_threshold_B` parameters.
   silence_threshold_A : float, optional
-      Threshold used to detect silence in `mfccs_A`. Must be >= 0 if specified.
+      Threshold used to detect silence in `mfccs_A`.
   silence_threshold_B : float, optional
-      Threshold used to detect silence in `mfccs_B`. Must be >= 0 if specified.
+      Threshold used to detect silence in `mfccs_B`.
   dtw_radius : int, optional, default=10
       Sakoe-Chiba radius for DTW alignment. A value of 1 is fastest but less accurate.
       None allows unrestricted warping but is slowest. Must be >= 1 if specified.
@@ -1174,7 +1127,7 @@ def compare_mfccs(
       If `aligning` is not 'pad' or 'dtw'.
   ValueError
       If silence removal is enabled but `silence_threshold_A` or `silence_threshold_B`
-      is not set or is < 0.
+      is not set.
   ValueError
       If `dtw_radius` is specified but not >= 1.
 

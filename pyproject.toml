@@ -125,10 +125,23 @@ envlist = py{38,39,310,311,312,313}
 isolated_build = True
 
 [testenv]
+setenv =
+  COVERAGE_FILE = .coverage.{envname}
+
 deps =
   pytest
+  pytest-cov
+  pytest-xdist
+  mypy
+  ruff
+
 commands =
-  pytest
+  mypy
+  ruff check
+  pytest -n auto \
+    --cov=src/mel_cepstral_distance \
+    --cov-append \
+    --cov-report=
 """
 
 [build-system]

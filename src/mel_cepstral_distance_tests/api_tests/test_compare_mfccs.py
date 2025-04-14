@@ -3,7 +3,7 @@ from logging import getLogger
 from pathlib import Path
 
 import numpy as np
-import numpy.testing as npt
+import numpy.typing as npt
 import pytest
 from scipy.io import wavfile
 

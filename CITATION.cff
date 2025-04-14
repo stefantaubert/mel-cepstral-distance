@@ -6,14 +6,14 @@ message: >-
   metadata from this file.
 type: software
 authors:
-  - given-names: Jasmin
-    family-names: Sternkopf
-    affiliation: Chemnitz University of Technology
   - given-names: Stefan
     family-names: Taubert
     affiliation: Chemnitz University of Technology
     orcid: 'https://orcid.org/0000-0002-4932-2874'
     website: 'https://stefantaubert.com/'
+  - given-names: Jasmin
+    family-names: Sternkopf
+    affiliation: Chemnitz University of Technology
 version: 0.0.3
 date-released: 2024-01-25
 license: MIT

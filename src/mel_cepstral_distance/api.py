@@ -1,3 +1,47 @@
+"""
+This module provides functions for processing and analyzing audio data, including
+the computation of spectrograms, extraction of Mel-Frequency Cepstral Coefficients
+(MFCCs), and calculation of the Mel-Cepstral Distance (MCD) between audio signals.
+
+Functions
+---------
+- `get_amplitude_spectrogram`: Computes the Short-Time Fourier Transform (STFT)
+  of an audio signal and returns the amplitude spectrogram.
+- `get_mel_spectrogram`: Converts an amplitude spectrogram to a mel-spectrogram
+  using mel filterbanks.
+- `get_mfccs`: Extracts MFCCs from a mel-spectrogram.
+- `compare_audio_files`: Compares two audio files by calculating the MCD and
+  alignment penalty.
+- `compare_amplitude_spectrograms`: Compares two amplitude spectrograms.
+- `compare_mel_spectrograms`: Compares two mel-spectrograms.
+- `compare_mfccs`: Compares two sets of MFCCs.
+
+Features
+--------
+- Silence removal at various stages of the processing pipeline.
+- Alignment of spectrograms or MFCCs using zero-padding or Dynamic Time Warping (DTW).
+- Flexible configuration of FFT parameters, mel filterbanks, and alignment strategies.
+
+Notes
+-----
+- The module assumes that input audio files are mono WAV files. If the audio files
+  contain multiple channels, preprocessing is required to convert them to mono.
+- For optimal performance, FFT window lengths should be powers of 2 in samples.
+- Silence removal is applied based on energy thresholds, either in the time domain
+  or at different spectral levels (e.g., mel-spectrogram or MFCCs).
+- The Mel-Cepstral Distance (MCD) is a commonly used metric for evaluating the
+  similarity between two audio signals, particularly in speech synthesis and
+  voice conversion tasks.
+
+Dependencies
+------------
+- `numpy`
+- `scipy`
+- `logging`
+- `pathlib`
+- `typing`
+"""
+
 from logging import getLogger
 from pathlib import Path
 from typing import Literal, Optional, Tuple
@@ -30,7 +74,7 @@ from mel_cepstral_distance.silence import (
 
 
 def get_amplitude_spectrogram(
-  audio: Path,
+  audio: Path | str,
   *,
   sample_rate: Optional[int] = None,
   n_fft: float = 32,
@@ -41,6 +85,72 @@ def get_amplitude_spectrogram(
   remove_silence: bool = False,
   silence_threshold: Optional[float] = None,
 ) -> npt.NDArray[np.complex128]:
+  """
+  Computes the complex-valued amplitude spectrogram (STFT) of an audio signal.
+  Optionally applies normalization and silence removal. While not invoked
+  elsewhere in the module, this function can be used independently to
+  experiment with silence removal and STFT configuration. This is useful for
+  analyzing the effect of preprocessing on subsequent alignment and distance
+  computation.
+
+  Parameters
+  ----------
+  audio : Path | str
+    Path to a mono WAV file. The file must exist and be readable.
+  sample_rate : int, optional
+    Target sample rate for resampling the audio. If not specified, the
+    original sample rate of the audio file is used. Must be > 0.
+  n_fft : float, default=32
+    Length of the FFT window in milliseconds. Must be > 0. The corresponding
+    number of samples should ideally be a power of 2 for efficient FFT
+    computation.
+  win_len : float, default=32
+    Window length in milliseconds. Can differ from `n_fft`. Must be > 0.
+  hop_len : float, default=8
+    Hop length in milliseconds between consecutive windows. Must be > 0.
+  window : {"hamming", "hanning"}, default="hanning"
+    Type of window function to apply during the STFT.
+  norm_audio : bool, default=True
+    If True, normalizes the audio signal to the range [-1, 1] before
+    processing.
+  remove_silence : bool, default=False
+    If True, removes silence from the audio signal based on the
+    `silence_threshold` parameter.
+  silence_threshold : float, optional
+    RMS threshold used to detect silence when `remove_silence` is True.
+    Must be >= 0 if specified.
+
+  Returns
+  -------
+  numpy.ndarray
+    A 2D complex-valued amplitude spectrogram of shape (frames, frequency bins).
+    Returns an empty array if the input audio is empty or consists only of
+    silence.
+
+  Raises
+  ------
+  ValueError
+    If `sample_rate` is not > 0.
+  ValueError
+    If `n_fft`, `win_len`, or `hop_len` is not > 0.
+  ValueError
+    If `window` is not "hamming" or "hanning".
+  ValueError
+    If silence removal is enabled but `silence_threshold` is not set or is < 0.
+  FileNotFoundError
+    If the specified `audio` file does not exist.
+  TypeError
+    If the `audio` parameter is not a valid path or string.
+
+  Notes
+  -----
+  - The function assumes the input audio is mono. If the audio file contains
+    multiple channels, additional preprocessing is required.
+  - For optimal performance, the FFT window length (`n_fft`) should be a power
+    of 2 in samples.
+  - If `n_fft` and `win_len` differ, the window will be truncated or padded
+    accordingly, which may affect the resulting spectrogram.
+  """
   if sample_rate is not None and not sample_rate > 0:
     raise ValueError("sample_rate must be > 0")
 
@@ -129,7 +239,58 @@ def get_mel_spectrogram(
   remove_silence: bool = False,
   silence_threshold: Optional[float] = None,
 ) -> npt.NDArray:
-  # amp_spec = X_km
+  """
+  Converts an amplitude spectrogram to a mel-spectrogram using mel filterbanks.
+  Optionally removes silence based on a threshold.
+
+  Parameters
+  ----------
+  amp_spec : numpy.ndarray
+    A 2D complex-valued amplitude spectrogram of shape (frames, frequency bins).
+  sample_rate : int
+    Sampling rate of the audio signal in Hz. Must be > 0.
+  n_fft : float
+    FFT window length in milliseconds. Must be > 0.
+  M : int, optional, default=20
+    Number of mel filterbanks. Must be > 0.
+  fmin : int, optional, default=0
+    Minimum frequency (in Hz) for mel-band calculation. Must satisfy 0 <= fmin < fmax.
+  fmax : int, optional
+    Maximum frequency (in Hz) for mel-band calculation. If not set, defaults to
+    sample_rate / 2. Must satisfy 0 < fmax <= sample_rate / 2.
+  remove_silence : bool, optional, default=False
+    If True, removes silence from the spectrogram based on `silence_threshold`.
+  silence_threshold : float, optional
+    Threshold used to detect silence when `remove_silence` is True. Must be >= 0.
+
+  Returns
+  -------
+  numpy.ndarray
+    A 2D mel-spectrogram of shape (frames, mel bands). Returns an empty array if
+    the input spectrogram is empty or becomes empty after silence removal.
+
+  Raises
+  ------
+  ValueError
+    If `amp_spec` does not have 2 dimensions.
+  ValueError
+    If `M` is not > 0.
+  ValueError
+    If `amp_spec` has no frequency bins.
+  ValueError
+    If `n_fft` is not > 0.
+  ValueError
+    If `sample_rate` is not > 0.
+  ValueError
+    If `fmax` is not in (0, sample_rate / 2].
+  ValueError
+    If `fmin` is not in [0, fmax).
+  ValueError
+    If the number of frequency bins in `amp_spec` does not match `n_fft` in samples.
+  ValueError
+    If silence removal is enabled but `silence_threshold` is not set or is < 0.
+  """
+  # amp_spec is X_km
 
   if len(amp_spec.shape) != 2:
     raise ValueError(
@@ -196,6 +357,46 @@ def get_mfccs(
   remove_silence: bool = False,
   silence_threshold: Optional[float] = None,
 ) -> npt.NDArray:
+  """
+  Computes the Mel-Frequency Cepstral Coefficients (MFCCs) from a given
+  mel-spectrogram. Optionally removes silence based on a threshold.
+
+  Parameters
+  ----------
+  mel_spec : numpy.ndarray
+    A 2D mel-spectrogram of shape (frames, mel bands). Must have at least
+    one frame and one mel band.
+  remove_silence : bool, optional, default=False
+    If True, removes silence from the mel-spectrogram based on the
+    `silence_threshold` parameter.
+  silence_threshold : float, optional
+    Threshold used to detect silence when `remove_silence` is True.
+    Must be >= 0 if specified.
+
+  Returns
+  -------
+  numpy.ndarray
+    A 2D array of MFCCs with shape (mel bands, frames). Returns an empty
+    array if the input mel-spectrogram is empty or becomes empty after
+    silence removal.
+
+  Raises
+  ------
+  ValueError
+    If `mel_spec` does not have 2 dimensions.
+  ValueError
+    If `mel_spec` has no mel bands or frames.
+  ValueError
+    If silence removal is enabled but `silence_threshold` is not set or is < 0.
+
+  Notes
+  -----
+  - The function assumes the input mel-spectrogram is precomputed and valid.
+  - Silence removal is applied by thresholding the mel-spectrogram frames
+    based on their energy.
+  - The resulting MFCCs are computed using the Discrete Cosine Transform (DCT)
+    on the log-mel-spectrogram.
+  """
   if len(mel_spec.shape) != 2:
     raise ValueError(
       f"mel-spectrogram must have 2 dimensions but got {len(mel_spec.shape)}"
@@ -227,8 +428,8 @@ def get_mfccs(
 
 
 def compare_audio_files(
-  audio_A: Path,
-  audio_B: Path,
+  audio_A: Path | str,
+  audio_B: Path | str,
   /,
   *,
   sample_rate: Optional[int] = None,
@@ -249,14 +450,110 @@ def compare_audio_files(
   norm_audio: bool = True,
   dtw_radius: Optional[int] = 10,
 ) -> Tuple[float, float]:
-  """- silence is removed before alignment
-  - high freq is max sr/2
-  - n_fft should be equal to win_len
-  - n_fft should be a power of 2 in samples
-  - dtw_radius:
-      - 1 means fastest but less accurate,
-      - None means slowest but most accurate alignment,
-      - 10 is a good trade-off
+  """
+  Compares two audio signals by computing the mean Mel-Cepstral Distance (MCD) between
+  them. Internally computes amplitude and mel spectrograms, extracts MFCCs, and aligns
+  them for comparison. Silence can optionally be removed before alignment.
+
+  This is the main entry point for evaluating similarity between two audio files in the
+  module.
+
+  Parameters
+  ----------
+  audio_A : Path | str
+      Path to the first mono WAV file.
+  audio_B : Path | str
+      Path to the second mono WAV file.
+  sample_rate : int, optional
+      If specified, both signals are resampled to this rate before processing. Otherwise,
+      the lower of the two input sample rates is used. Must be > 0.
+  n_fft : float, default=32
+      FFT window length in milliseconds. Must be > 0. The corresponding number of samples
+      should be a power of 2 for efficient FFT computation.
+  win_len : float, default=32
+      Window length in milliseconds. Should be equal to `n_fft`. Must be > 0.
+  hop_len : float, default=8
+      Hop length in milliseconds. Must be > 0.
+  window : Literal["hamming", "hanning"], default="hanning"
+      Type of window function used in the STFT.
+  fmin : int, default=0
+      Minimum frequency (in Hz) for mel-band calculation. Must satisfy 0 <= fmin < fmax.
+  fmax : int, optional
+      Maximum frequency (in Hz) for mel-band calculation. If not set, defaults to
+      sample_rate / 2. Must satisfy 0 < fmax <= sample_rate / 2.
+  M : int, default=20
+      Number of mel filterbanks. Must be > 0.
+  s : int, default=1
+      Starting index (inclusive) for MFCCs used in MCD calculation. Must be in [0, D).
+  D : int, default=16
+      Number of MFCC coefficients considered for distance computation.
+      Must satisfy D <= M.
+  aligning : Literal["pad", "dtw"], default="dtw"
+      Alignment strategy. "pad" uses zero-padding; "dtw" uses Dynamic Time Warping. DTW
+      is more accurate but computationally more expensive.
+  align_target : Literal["spec", "mel", "mfcc"], default="mel"
+      Spectral level at which alignment is applied. Determines at which stage
+      silence can be removed.
+  remove_silence : Literal["no", "sig", "spec", "mel", "mfcc"], default="no"
+      Stage at which silence is removed. "sig" applies RMS-based silence removal in the
+      time domain. Other options apply thresholding to spectral frames.
+      Silence is always removed before alignment.
+  silence_threshold_A : float, optional
+      Threshold used to detect silence in `audio_A`, depending on the selected
+      `remove_silence` strategy. For `"sig"`, this is an RMS threshold; for spectral
+      stages, it applies to frame energy or amplitude. Must be >= 0 if specified.
+  silence_threshold_B : float, optional
+      Same as `silence_threshold_A`, but applied to `audio_B`.
+      Must be >= 0 if specified.
+  norm_audio : bool, default=True
+      If True, normalizes both signals to the range [-1, 1] before processing.
+  dtw_radius : int, optional, default=10
+      Sakoe-Chiba radius for DTW alignment. A value of 1 is fastest but less accurate.
+      None allows unrestricted warping but is slowest. A value of 10 is a good
+      compromise between speed and accuracy.
+
+  Returns
+  -------
+  Tuple[float, float]
+      - Mean MCD over all selected coefficients.
+      - Alignment penalty. Returns (nan, nan) if either input is empty or becomes empty
+        due to silence removal.
+
+  Raises
+  ------
+  ValueError
+      If `audio_A` or `audio_B` is not a valid file path or cannot be read.
+  ValueError
+      If `sample_rate` is not > 0.
+  ValueError
+      If `n_fft` is not > 0 or is not a power of 2 in samples.
+  ValueError
+      If `win_len` is not > 0 or does not match `n_fft`.
+  ValueError
+      If `hop_len` is not > 0.
+  ValueError
+      If `window` is not "hamming" or "hanning".
+  ValueError
+      If `fmin` is not in [0, fmax).
+  ValueError
+      If `fmax` is not in (0, sample_rate / 2].
+  ValueError
+      If `M` is not > 0.
+  ValueError
+      If `D` is not <= `M`.
+  ValueError
+      If `s` is not in [0, D).
+  ValueError
+      If `aligning` is not "pad" or "dtw".
+  ValueError
+      If `align_target` is not "spec", "mel", or "mfcc".
+  ValueError
+      If `remove_silence` is not "no", "sig", "spec", "mel", or "mfcc".
+  ValueError
+      If silence removal is enabled but `silence_threshold_A` or `silence_threshold_B`
+      is not set or is < 0.
+  ValueError
+      If `dtw_radius` is specified but not >= 1.
   """
   if remove_silence not in ["no", "sig", "spec", "mel", "mfcc"]:
     raise ValueError("remove_silence must be 'no', 'sig', 'spec', 'mel' or 'mfcc'")
@@ -404,6 +701,88 @@ def compare_amplitude_spectrograms(
   silence_threshold_B: Optional[float] = None,
   dtw_radius: Optional[int] = 10,
 ) -> Tuple[float, float]:
+  """
+  Compares two amplitude spectrograms by computing the mean Mel-Cepstral Distance (MCD)
+  and an alignment penalty. The function supports silence removal and alignment at
+  different stages of the processing pipeline.
+
+  Parameters
+  ----------
+  amp_spec_A : numpy.ndarray
+      A 2D complex-valued amplitude spectrogram of shape (frames, frequency bins).
+  amp_spec_B : numpy.ndarray
+      A 2D complex-valued amplitude spectrogram of shape (frames, frequency bins).
+  sample_rate : int
+      Sampling rate of the audio signals in Hz. Must be > 0.
+  n_fft : float
+      FFT window length in milliseconds. Must be > 0.
+  fmin : int, optional, default=0
+      Minimum frequency (in Hz) for mel-band calculation. Must satisfy 0 <= fmin < fmax.
+  fmax : int, optional, default=None
+      Maximum frequency (in Hz) for mel-band calculation. If not set, defaults to
+      sample_rate / 2. Must satisfy 0 < fmax <= sample_rate / 2.
+  M : int, optional, default=20
+      Number of mel filterbanks. Must be > 0.
+  s : int, optional, default=1
+      Starting index (inclusive) for MFCCs used in MCD calculation. Must be in [0, D).
+  D : int, optional, default=16
+      Number of MFCC coefficients considered for distance computation. Must satisfy
+      D <= M.
+  aligning : {'pad', 'dtw'}, optional, default='dtw'
+      Alignment strategy. "pad" uses zero-padding; "dtw" uses Dynamic Time Warping.
+      DTW is more accurate but computationally more expensive.
+  align_target : {'spec', 'mel', 'mfcc'}, optional, default='spec'
+      Spectral level at which alignment is applied. Determines at which stage silence
+      can be removed.
+  remove_silence : {'no', 'spec', 'mel', 'mfcc'}, optional, default='no'
+      Stage at which silence is removed. "spec" applies thresholding to spectral frames,
+      while "mel" and "mfcc" apply thresholding to mel-spectrograms or MFCCs,
+      respectively. Silence is always removed before alignment.
+  silence_threshold_A : float, optional
+      Threshold used to detect silence in `amp_spec_A`, depending on the selected
+      `remove_silence` strategy. For "spec", this applies to frame energy or amplitude.
+      Must be >= 0 if specified.
+  silence_threshold_B : float, optional
+      Same as `silence_threshold_A`, but applied to `amp_spec_B`.
+  dtw_radius : int, optional, default=10
+      Sakoe-Chiba radius for DTW alignment. A value of 1 is fastest but less accurate.
+      None allows unrestricted warping but is slowest. Must be >= 1 if specified.
+
+  Returns
+  -------
+  Tuple[float, float]
+      - Mean MCD over all selected coefficients.
+      - Alignment penalty. Returns (nan, nan) if either input is empty or becomes empty
+        due to silence removal.
+
+  Raises
+  ------
+  ValueError
+      If `amp_spec_A` or `amp_spec_B` does not have 2 dimensions.
+  ValueError
+      If the number of frequency bins in `amp_spec_A` and `amp_spec_B` do not match.
+  ValueError
+      If `n_fft` is not > 0 or does not match the number of frequency bins.
+  ValueError
+      If `sample_rate` is not > 0.
+  ValueError
+      If `fmin` is not in [0, fmax).
+  ValueError
+      If `fmax` is not in (0, sample_rate / 2].
+  ValueError
+      If `M` is not > 0.
+  ValueError
+      If `D` is not <= `M`.
+  ValueError
+      If `aligning` is not 'pad' or 'dtw'.
+  ValueError
+      If `remove_silence` is not 'no', 'spec', 'mel', or 'mfcc'.
+  ValueError
+      If `dtw_radius` is specified but not >= 1.
+  ValueError
+      If silence removal is enabled but `silence_threshold_A` or `silence_threshold_B`
+      is not set or is < 0.
+  """
   if len(amp_spec_A.shape) != 2:
     raise ValueError(
       f"amplitude spectrogram A must have 2 dimensions but got {len(amp_spec_A.shape)}"
@@ -553,6 +932,79 @@ def compare_mel_spectrograms(
   silence_threshold_B: Optional[float] = None,
   dtw_radius: Optional[int] = 10,
 ) -> Tuple[float, float]:
+  """
+  Compares two mel-spectrograms by computing the mean Mel-Cepstral Distance (MCD)
+  and an alignment penalty. Supports silence removal and alignment at different
+  stages of the processing pipeline.
+
+  Parameters
+  ----------
+  mel_spec_A : numpy.ndarray
+      A 2D mel-spectrogram of shape (frames, mel bands).
+  mel_spec_B : numpy.ndarray
+      A 2D mel-spectrogram of shape (frames, mel bands).
+  s : int, optional, default=1
+      Starting index (inclusive) for MFCCs used in MCD calculation. Must be in [0, D).
+  D : int, optional, default=16
+      Number of MFCC coefficients considered for distance computation. Must satisfy
+      D <= number of mel bands.
+  aligning : {'pad', 'dtw'}, optional, default='dtw'
+      Alignment strategy. "pad" uses zero-padding; "dtw" uses Dynamic Time Warping.
+      DTW is more accurate but computationally more expensive.
+  align_target : {'mel', 'mfcc'}, optional, default='mel'
+      Spectral level at which alignment is applied. Determines at which stage silence
+      should be removed.
+  remove_silence : {'no', 'mel', 'mfcc'}, optional, default='no'
+      Stage at which silence is removed. "mel" applies thresholding to mel-spectrogram
+      frames, while "mfcc" applies thresholding to MFCCs. Silence is always removed
+      before alignment.
+  silence_threshold_A : float, optional
+      Threshold used to detect silence in `mel_spec_A`, depending on the selected
+      `remove_silence` strategy. Must be >= 0 if specified.
+  silence_threshold_B : float, optional
+      Same as `silence_threshold_A`, but applied to `mel_spec_B`.
+  dtw_radius : int, optional, default=10
+      Sakoe-Chiba radius for DTW alignment. A value of 1 is fastest but less accurate.
+      None allows unrestricted warping but is slowest. Must be >= 1 if specified.
+
+  Returns
+  -------
+  Tuple[float, float]
+      - Mean MCD over all selected coefficients.
+      - Alignment penalty.
+      Returns (nan, nan) if either input is empty or becomes empty
+        due to silence removal.
+
+  Raises
+  ------
+  ValueError
+      If `mel_spec_A` or `mel_spec_B` does not have 2 dimensions.
+  ValueError
+      If the number of mel bands in `mel_spec_A` and `mel_spec_B` do not match.
+  ValueError
+      If `D` is not <= number of mel bands.
+  ValueError
+      If `s` is not in [0, D).
+  ValueError
+      If `aligning` is not 'pad' or 'dtw'.
+  ValueError
+      If `remove_silence` is not 'no', 'mel', or 'mfcc'.
+  ValueError
+      If `align_target` is not 'mel' or 'mfcc'.
+  ValueError
+      If silence removal is enabled but `silence_threshold_A` or `silence_threshold_B`
+      is not set or is < 0.
+  ValueError
+      If `dtw_radius` is specified but not >= 1.
+
+  Notes
+  -----
+  - The function assumes the input mel-spectrograms are precomputed and valid.
+  - Silence removal is applied by thresholding the mel-spectrogram frames or MFCCs
+    based on their energy.
+  - Alignment is performed using either zero-padding or Dynamic Time Warping (DTW).
+  - The resulting MCD is computed over the selected MFCC coefficients.
+  """
   if not len(mel_spec_A.shape) == 2:
     raise ValueError(
       f"mel-spectrogram A must have 2 dimensions but got {len(mel_spec_A.shape)}"
@@ -671,6 +1123,68 @@ def compare_mfccs(
   silence_threshold_B: Optional[float] = None,
   dtw_radius: Optional[int] = 10,
 ) -> Tuple[float, float]:
+  """
+  Compares two sets of MFCCs by computing the mean Mel-Cepstral Distance (MCD)
+  and an alignment penalty. Supports silence removal and alignment using
+  zero-padding or Dynamic Time Warping (DTW).
+
+  Parameters
+  ----------
+  mfccs_A : numpy.ndarray
+      A 2D array of MFCCs with shape (coefficients, frames).
+  mfccs_B : numpy.ndarray
+      A 2D array of MFCCs with shape (coefficients, frames).
+  s : int, optional, default=1
+      Starting index (inclusive) for MFCCs used in MCD calculation. Must be in [0, D).
+  D : int, optional, default=16
+      Number of MFCC coefficients considered for distance computation. Must satisfy
+      D <= number of coefficients in `mfccs_A` and `mfccs_B`.
+  aligning : {'pad', 'dtw'}, optional, default='dtw'
+      Alignment strategy. "pad" uses zero-padding; "dtw" uses Dynamic Time Warping.
+      DTW is more accurate but computationally more expensive.
+  remove_silence : bool, optional, default=False
+      If True, removes silence from the MFCCs based on the `silence_threshold_A`
+      and `silence_threshold_B` parameters.
+  silence_threshold_A : float, optional
+      Threshold used to detect silence in `mfccs_A`. Must be >= 0 if specified.
+  silence_threshold_B : float, optional
+      Threshold used to detect silence in `mfccs_B`. Must be >= 0 if specified.
+  dtw_radius : int, optional, default=10
+      Sakoe-Chiba radius for DTW alignment. A value of 1 is fastest but less accurate.
+      None allows unrestricted warping but is slowest. Must be >= 1 if specified.
+
+  Returns
+  -------
+  Tuple[float, float]
+      - Mean MCD over all selected coefficients.
+      - Alignment penalty. Returns (nan, nan) if either input is empty or becomes empty
+        due to silence removal.
+
+  Raises
+  ------
+  ValueError
+      If `mfccs_A` or `mfccs_B` does not have 2 dimensions.
+  ValueError
+      If the number of coefficients in `mfccs_A` and `mfccs_B` do not match.
+  ValueError
+      If `D` is not <= number of coefficients in `mfccs_A` and `mfccs_B`.
+  ValueError
+      If `s` is not in [0, D).
+  ValueError
+      If `aligning` is not 'pad' or 'dtw'.
+  ValueError
+      If silence removal is enabled but `silence_threshold_A` or `silence_threshold_B`
+      is not set or is < 0.
+  ValueError
+      If `dtw_radius` is specified but not >= 1.
+
+  Notes
+  -----
+  - The function assumes the input MFCCs are precomputed and valid.
+  - Silence removal is applied by thresholding the MFCC frames based on their energy.
+  - Alignment is performed using either zero-padding or Dynamic Time Warping (DTW).
+  - The resulting MCD is computed over the selected MFCC coefficients.
+  """
   if not len(mfccs_A.shape) == 2:
     raise ValueError(f"MFCCs A must have 2 dimensions but got {len(mfccs_A.shape)}")
 

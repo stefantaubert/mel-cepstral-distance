@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Complete refactoring of the codebase
 - Support for Python 3.8-3.13
+- Support removal of pause
 
 ## [0.0.3] - 2024-01-25
 

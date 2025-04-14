@@ -1,54 +1,30 @@
-# Mel-Cepstral Distance
+# mel-cepstral-distance
 
 [![PyPI](https://img.shields.io/pypi/v/mel-cepstral-distance.svg)](https://pypi.python.org/pypi/mel-cepstral-distance)
 [![PyPI](https://img.shields.io/pypi/pyversions/mel-cepstral-distance.svg)](https://pypi.python.org/pypi/mel-cepstral-distance)
 [![MIT](https://img.shields.io/github/license/jasminsternkopf/mel_cepstral_distance.svg)](https://github.com/jasminsternkopf/mel_cepstral_distance/blob/main/LICENSE)
-![PyPI](https://img.shields.io/pypi/implementation/mel-cepstral-distance.svg)
 [![PyPI](https://img.shields.io/github/commits-since/jasminsternkopf/mel_cepstral_distance/latest/main.svg)](https://github.com/jasminsternkopf/mel_cepstral_distance/compare/v0.0.3...main)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/mel-cepstral-distance.svg?label=PyPI%20downloads)](https://pypi.org/project/mel-cepstral-distance)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10567255.svg)](https://doi.org/10.5281/zenodo.10567255)
-[![Downloads](https://static.pepy.tech/badge/mel-cepstral-distance)](https://pepy.tech/project/mel-cepstral-distance)
 
-Python library to compute the Mel-Cepstral Distance (also called Mel-Cepstral Distortion, MCD) of two audio signals based on [Mel-Cepstral Distance Measure for Objective Speech Quality Assessment](https://ieeexplore.ieee.org/document/407206) by Robert F. Kubichek.
+A Python library for computing the Mel-Cepstral Distance (also known as Mel-Cepstral Distortion, MCD) between two audio signals. This implementation is based on the method proposed by Robert F. Kubichek in [*Mel-Cepstral Distance Measure for Objective Speech Quality Assessment*](https://ieeexplore.ieee.org/document/407206).
 
-## ** Note on the new version [2024/12/05] **
+- Compute MCD between two inputs: audio files, amplitude spectrograms, mel spectrograms, or MFCCs.
+- Remove pauses from audio files or feature representations (amplitude spectrograms, mel spectrograms, or MFCCs) using a threshold.
+- Align feature representations using either Dynamic Time Warping (DTW) or zero-padding.
+- Calculate an alignment penalty as an additional metric to indicate the extent of alignment applied.
 
-The current code repository represents a complete refactoring of the previous codebase, aiming to enhance clarity and alignment with the methodologies described in the original paper.
+## Getting Started
 
-Key changes include:
-
-- **Removal of CLI**: The command-line interface has been eliminated to streamline the functionality and focus on core features.  
-- **Improved Calculation**: The computation now adheres more closely to the approach outlined in the original research.  
-- **Pause Removal**: Functionality for handling pauses has been introduced.  
-- **Enhanced Literature Review**: A thorough review of relevant literature has been conducted to refine the default parameter values. However, not all necessary details are provided in the referenced papers, which may require further interpretation.  
-- **Reduced Dependencies**: Non-essential dependencies have been removed, including `librosa`, resulting in a more lightweight and focused package.  
-
-For the time being, it is recommended to clone the repository and use `pip install .` for installation rather than relying on the PyPI version. Further updates to the codebase are planned for an upcoming version.
-
-### Test coverage
-
-```txt
----------- coverage: platform linux, python 3.8.20-final-0 -----------
-Name                                       Stmts   Miss  Cover   Missing
-------------------------------------------------------------------------
-src/mel_cepstral_distance/__init__.py          1      0   100%
-src/mel_cepstral_distance/alignment.py        70      0   100%
-src/mel_cepstral_distance/api.py             365      0   100%
-src/mel_cepstral_distance/computation.py      68      0   100%
-src/mel_cepstral_distance/helper.py           38      0   100%
-src/mel_cepstral_distance/silence.py          56      0   100%
-------------------------------------------------------------------------
-TOTAL                                        598      0   100%
-```
-
-## Installation
+### Installation
 
 ```sh
-pip install mel-cepstral-distance --user
+pip install mel-cepstral-distance
 ```
 
-## Example usage
+### Example usage
 
-### Compare two audio files with default parameters
+Compare two audio files with default parameters:
 
 ```py
 from mel_cepstral_distance import compare_audio_files
@@ -145,7 +121,7 @@ Where:
 - $N_X$: The number of frames in the reference sequence.
 - $N_Y$: The number of frames in the target sequence.
 - $N_{XY}$: The number of frames after alignment (same for X and Y).
-- $PEN$: A value between $0$ and $1$, where a smaller value indicates less alignment.
+- $PEN$: A value in interval [$0$, $1$), where a smaller value indicates less alignment.
 
 ### Used parameters in literature
 
@@ -208,6 +184,22 @@ Based on the values in the literature the default parameters were set:
 ## License
 
 MIT License
+
+### Test coverage
+
+```txt
+---------- coverage: platform linux, python 3.8.20-final-0 -----------
+Name                                       Stmts   Miss  Cover   Missing
+------------------------------------------------------------------------
+src/mel_cepstral_distance/__init__.py          1      0   100%
+src/mel_cepstral_distance/alignment.py        70      0   100%
+src/mel_cepstral_distance/api.py             365      0   100%
+src/mel_cepstral_distance/computation.py      68      0   100%
+src/mel_cepstral_distance/helper.py           38      0   100%
+src/mel_cepstral_distance/silence.py          56      0   100%
+------------------------------------------------------------------------
+TOTAL                                        598      0   100%
+```
 
 ## Citation
 

@@ -41,7 +41,7 @@ def get_X_km(
   assert window in ["hamming", "hanning"]
   K = len(S)
   windowed_frames = np.array(
-    [S[k : k + win_len] for k in np.arange(0, K - win_len, hop_length)]
+    [S[k : k + win_len] for k in np.arange(0, K - win_len, hop_length, int)]
   )
 
   windowed_frames, adjusted_win_len = adjust_win_len_to_n_fft(windowed_frames, n_fft)

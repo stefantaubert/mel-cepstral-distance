@@ -46,7 +46,7 @@ classifiers = [
 dependencies = ["numpy>=1.22.4", "scipy>=1.8.0", "fastdtw>=0.3.4"]
 
 [project.optional-dependencies]
-dev = ["pytest", "coverage", "tox", "ruff", "mypy", "rope"]
+dev = ["pytest", "pytest-cov", "tox", "ruff", "mypy", "rope", "build", "twine"]
 
 [project.urls]
 Homepage = "https://github.com/jasminsternkopf/mel_cepstral_distance"
@@ -99,13 +99,13 @@ select = [
     # flake8-simplify
     "SIM",
     # isort
-    "I",    
+    "I",
     "C4",
-    "T20",     
+    "T20",
     "PERF",
     "ANN",
     "TID",
-    "EXE",
+    "EXE", 
     "W",
     "D",
 ]
@@ -113,6 +113,8 @@ select = [
 [tool.ruff.format]
 indent-style = "space"
 
+[tool.ruff.isort]
+known-first-party = ["mel_cepstral_distance*"]
 
 [tool.tox]
 legacy_tox_ini = """
@@ -121,9 +123,9 @@ envlist = py{38,39,310,311,312,313}
 isolated_build = True
 
 [testenv]
-deps = 
+deps =
   pytest
-commands = 
+commands =
   pytest
 """
 

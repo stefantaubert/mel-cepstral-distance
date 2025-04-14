@@ -148,3 +148,4 @@ original.wav
 deploy-PyPI.sh
 TODO.txt
 *_debug/
+coverage_output.txt

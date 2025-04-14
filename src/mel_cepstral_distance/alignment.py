@@ -55,15 +55,15 @@ def align_X_kn(
   return X_kn_A, X_kn_B, pen
 
 
-def align_MC(
-  MC_X_ik: npt.NDArray,
-  MC_Y_ik: npt.NDArray,
-  aligning: Literal["dtw", "pad"],
-  custom_radius: Optional[int],
-) -> Tuple[npt.NDArray, npt.NDArray, float]:
-  assert aligning in ["dtw", "pad"]
-  MC_X_ik, MC_Y_ik, pen = align_frames_2d(MC_X_ik, MC_Y_ik, aligning, custom_radius)
-  return MC_X_ik, MC_Y_ik, pen
+# def align_MC(
+#   MC_X_ik: npt.NDArray,
+#   MC_Y_ik: npt.NDArray,
+#   aligning: Literal["dtw", "pad"],
+#   custom_radius: Optional[int],
+# ) -> Tuple[npt.NDArray, npt.NDArray, float]:
+#   assert aligning in ["dtw", "pad"]
+#   MC_X_ik, MC_Y_ik, pen = align_frames_2d(MC_X_ik, MC_Y_ik, aligning, custom_radius)
+#   return MC_X_ik, MC_Y_ik, pen
 
 
 def align_MC_s_D(

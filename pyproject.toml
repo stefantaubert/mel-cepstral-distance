@@ -84,9 +84,14 @@ log_level = "DEBUG"
 testpaths = ["src/mel_cepstral_distance_tests"]
 
 [tool.ruff]
+src = ["src/mel_cepstral_distance"]
 line-length = 88
 indent-width = 2
-src = ["src/mel_cepstral_distance"]
+
+[tool.ruff.format]
+indent-style = "space"
+
+[tool.ruff.lint]
 select = [
     # pycodestyle
     "E",
@@ -107,13 +112,10 @@ select = [
     "TID",
     "EXE", 
     "W",
-    "D",
+    # "D",
 ]
 
-[tool.ruff.format]
-indent-style = "space"
-
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["mel_cepstral_distance*"]
 
 [tool.tox]

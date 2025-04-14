@@ -15,7 +15,9 @@ from mel_cepstral_distance.computation import (
 from mel_cepstral_distance.helper import get_hz_points
 
 
-def norm_w_n_m(w_n_m: npt.NDArray, method: Literal["slaney", "sum"], hz_points: npt.NDArray) -> npt.NDArray:
+def norm_w_n_m(
+  w_n_m: npt.NDArray, method: Literal["slaney", "sum"], hz_points: npt.NDArray
+) -> npt.NDArray:
   """Normalizes the Mel filter bank"""
   assert method in ["slaney", "sum"]
   M, n_fft = w_n_m.shape
@@ -33,7 +35,7 @@ def norm_w_n_m(w_n_m: npt.NDArray, method: Literal["slaney", "sum"], hz_points: 
   return w_n_m
 
 
-def test_compontent():
+def test_compontent() -> None:
   K = 10000
   np.random.seed(1)
   S1 = np.random.rand(K)
@@ -61,7 +63,7 @@ def test_compontent():
   assert np.allclose(mean_mcd_over_all_k, 6.484722423858316)
 
 
-def test_norm_filter_bank_does_not_change_result():
+def test_norm_filter_bank_does_not_change_result() -> None:
   K = 10000
   np.random.seed(1)
   S1 = np.random.rand(K)

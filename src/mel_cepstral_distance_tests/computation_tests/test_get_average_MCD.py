@@ -3,34 +3,34 @@ import numpy as np
 from mel_cepstral_distance.computation import get_average_MCD
 
 
-def test_single_value():
+def test_single_value() -> None:
   MCD_k = np.array([10])
   expected = 10
   result = get_average_MCD(MCD_k)
   assert result == expected, f"Expected {expected}, but got {result}."
 
 
-def test_multiple_values():
+def test_multiple_values() -> None:
   MCD_k = np.array([10, 20, 30])
   expected = 20
   result = get_average_MCD(MCD_k)
   assert result == expected, f"Expected {expected}, but got {result}."
 
 
-def test_empty_array():
+def test_empty_array() -> None:
   MCD_k: np.ndarray = np.array([])
   result = get_average_MCD(MCD_k)
   assert np.isnan(result), f"Expected NaN for empty input, but got {result}."
 
 
-def test_mixed_values():
+def test_mixed_values() -> None:
   MCD_k = np.array([0, 20, 15])
   expected = 11.666666666666666
   result = get_average_MCD(MCD_k)
   assert result == expected, f"Expected {expected}, but got {result}."
 
 
-def test_large_values():
+def test_large_values() -> None:
   MCD_k = np.array([1e10, 2e10, 3e10])
   expected = 2e10
   result = get_average_MCD(MCD_k)

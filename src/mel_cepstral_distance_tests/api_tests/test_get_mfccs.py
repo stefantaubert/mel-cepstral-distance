@@ -1,7 +1,9 @@
 import pickle
+from logging import getLogger
 from pathlib import Path
 
 import numpy as np
+import numpy.testing as npt
 import pytest
 
 from mel_cepstral_distance.api import (
@@ -20,15 +22,24 @@ N_FFT = samples_to_ms(512, 22050)
 SR = 22050
 
 
-def get_X_kn():
-  amp_spec = get_amplitude_spectrogram(AUDIO_A, sample_rate=SR, n_fft=N_FFT, window="hamming",
-                                       hop_len=16, norm_audio=False, remove_silence=False, win_len=N_FFT)
+def get_X_kn() -> npt.NDArray:
+  amp_spec = get_amplitude_spectrogram(
+    AUDIO_A,
+    sample_rate=SR,
+    n_fft=N_FFT,
+    window="hamming",
+    hop_len=16,
+    norm_audio=False,
+    remove_silence=False,
+    win_len=N_FFT,
+  )
   mel_spec = get_mel_spectrogram(
-    amp_spec, SR, N_FFT, remove_silence=False, fmax=SR // 2, fmin=0, M=20)
+    amp_spec, SR, N_FFT, remove_silence=False, fmax=SR // 2, fmin=0, M=20
+  )
   return mel_spec
 
 
-def test_result_changes_after_silence_removal():
+def test_result_changes_after_silence_removal() -> None:
   res = get_mfccs(
     get_X_kn(),
     remove_silence=False,
@@ -47,12 +58,12 @@ def test_result_changes_after_silence_removal():
   assert res.shape == (20, 173)
 
 
-def test_no_silence_threshold_raises_error():
+def test_no_silence_threshold_raises_error() -> None:
   with pytest.raises(ValueError):
     get_mfccs(get_X_kn(), remove_silence=True, silence_threshold=None)
 
 
-def test_removing_silence_from_sig_too_hard_returns_empty():
+def test_removing_silence_from_sig_too_hard_returns_empty() -> None:
   loudness_max = get_loudness_vals_X_kn(get_X_kn()).max()
   res = get_mfccs(
     get_X_kn(),
@@ -63,7 +74,7 @@ def test_removing_silence_from_sig_too_hard_returns_empty():
   assert res.shape == (20, 0)
 
 
-def test_one_dim_raises_error():
+def test_one_dim_raises_error() -> None:
   with pytest.raises(ValueError):
     get_mfccs(
       np.zeros(20),
@@ -71,7 +82,7 @@ def test_one_dim_raises_error():
     )
 
 
-def test_three_dim_raises_error():
+def test_three_dim_raises_error() -> None:
   with pytest.raises(ValueError):
     get_mfccs(
       np.empty((303, 20, 10), dtype=np.float64),
@@ -79,7 +90,7 @@ def test_three_dim_raises_error():
     )
 
 
-def test_zero_mel_bands_raises_error():
+def test_zero_mel_bands_raises_error() -> None:
   with pytest.raises(ValueError):
     get_mfccs(
       np.empty((303, 0), dtype=np.float64),
@@ -87,7 +98,7 @@ def test_zero_mel_bands_raises_error():
     )
 
 
-def test_empty_spec_returns_empty():
+def test_empty_spec_returns_empty() -> None:
   empty_spec = np.empty((0, 20), dtype=np.float64)
 
   res = get_mfccs(
@@ -98,7 +109,7 @@ def test_empty_spec_returns_empty():
   assert res.shape == (20, 0)
 
 
-def create_outputs():
+def create_outputs() -> None:
   # silence removal
   loudness_max = get_loudness_vals_X_kn(get_X_kn()).max()
   targets = [None, loudness_max / 2, loudness_max - 1, loudness_max + 1]
@@ -113,12 +124,17 @@ def create_outputs():
     )
     outputs.append((sil_removal, spec))
 
+  logger = getLogger(__name__)
   for vals in outputs:
-    print("\t".join(str(i) if not isinstance(i, np.ndarray) else str(np.mean(i)) for i in vals))
+    logger.info(
+      "\t".join(
+        str(i) if not isinstance(i, np.ndarray) else str(np.mean(i)) for i in vals
+      )
+    )
   (TEST_DIR / "test_get_mfccs.pkl").write_bytes(pickle.dumps(outputs))
 
 
-def test_outputs():
+def test_outputs() -> None:
   outputs = pickle.loads((TEST_DIR / "test_get_mfccs.pkl").read_bytes())
   for sil_removal, expected_spec in outputs:
     spec = get_mfccs(

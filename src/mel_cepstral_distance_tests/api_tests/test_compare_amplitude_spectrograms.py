@@ -1,7 +1,9 @@
 import pickle
+from logging import getLogger
 from pathlib import Path
 
 import numpy as np
+import numpy.typing as npt
 import pytest
 from scipy.io import wavfile
 
@@ -22,7 +24,7 @@ SR = 22050
 N_FFT = samples_to_ms(512, 22050)
 
 
-def test_zero_dim_spec_raise_error():
+def test_zero_dim_spec_raise_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(get_X_km_A(), np.empty((305, 0)), SR, N_FFT)
 
@@ -33,7 +35,7 @@ def test_zero_dim_spec_raise_error():
     compare_amplitude_spectrograms(np.empty((305, 0)), np.empty((305, 0)), SR, N_FFT)
 
 
-def test_one_dim_spec_raise_error():
+def test_one_dim_spec_raise_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(get_X_km_A(), np.empty(305), SR, N_FFT)
 
@@ -44,7 +46,7 @@ def test_one_dim_spec_raise_error():
     compare_amplitude_spectrograms(np.empty(305), np.empty(305), SR, N_FFT)
 
 
-def test_three_dim_spec_raise_error():
+def test_three_dim_spec_raise_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(get_X_km_A(), np.empty((305, 20, 10)), SR, N_FFT)
 
@@ -57,19 +59,19 @@ def test_three_dim_spec_raise_error():
     )
 
 
-def get_X_km_A():
+def get_X_km_A() -> npt.NDArray[np.complex128]:
   sr1, signalA = wavfile.read(AUDIO_A)
   signalA = norm_audio_signal(signalA)
   return get_X_km(signalA, 512, 512, 128, "hamming")
 
 
-def get_X_km_B():
+def get_X_km_B() -> npt.NDArray[np.complex128]:
   sr2, signalB = wavfile.read(AUDIO_B)
   signalB = norm_audio_signal(signalB)
   return get_X_km(signalB, 512, 512, 128, "hamming")
 
 
-def test_aligning_with_pad_returns_same_for_spec_mel_mfcc():
+def test_aligning_with_pad_returns_same_for_spec_mel_mfcc() -> None:
   res = []
   for align_target in ["spec", "mel", "mfcc"]:
     mcd, pen = compare_amplitude_spectrograms(
@@ -87,7 +89,7 @@ def test_aligning_with_pad_returns_same_for_spec_mel_mfcc():
   np.testing.assert_almost_equal(res[1], res[2])
 
 
-def test_result_changes_after_silence_removal_before_padding_mel():
+def test_result_changes_after_silence_removal_before_padding_mel() -> None:
   mcd, pen = compare_amplitude_spectrograms(
     get_X_km_A(),
     get_X_km_B(),
@@ -115,7 +117,7 @@ def test_result_changes_after_silence_removal_before_padding_mel():
   assert not np.allclose(pen, pen2)
 
 
-def test_result_changes_after_silence_removal_before_padding_mfcc():
+def test_result_changes_after_silence_removal_before_padding_mfcc() -> None:
   mcd, pen = compare_amplitude_spectrograms(
     get_X_km_A(),
     get_X_km_B(),
@@ -153,7 +155,7 @@ def test_result_changes_after_silence_removal_before_padding_mfcc():
   assert not np.allclose(pen, pen2)
 
 
-def test_same_spec_returns_zero():
+def test_same_spec_returns_zero() -> None:
   mcd, pen = compare_amplitude_spectrograms(
     get_X_km_A(),
     get_X_km_A(),
@@ -172,7 +174,7 @@ def test_same_spec_returns_zero():
   assert pen == 0
 
 
-def test_removing_silence_from_spec_too_hard_returns_nan_nan():
+def test_removing_silence_from_spec_too_hard_returns_nan_nan() -> None:
   mcd, pen = compare_amplitude_spectrograms(
     get_X_km_A(),
     get_X_km_B(),
@@ -234,7 +236,7 @@ def test_removing_silence_from_spec_too_hard_returns_nan_nan():
   assert np.isnan(pen)
 
 
-def test_removing_silence_from_mel_too_hard_returns_nan_nan():
+def test_removing_silence_from_mel_too_hard_returns_nan_nan() -> None:
   mcd, pen = compare_amplitude_spectrograms(
     get_X_km_A(),
     get_X_km_B(),
@@ -296,7 +298,7 @@ def test_removing_silence_from_mel_too_hard_returns_nan_nan():
   assert np.isnan(pen)
 
 
-def test_removing_silence_from_mfcc_too_hard_returns_nan_nan():
+def test_removing_silence_from_mfcc_too_hard_returns_nan_nan() -> None:
   mcd, pen = compare_amplitude_spectrograms(
     get_X_km_A(),
     get_X_km_B(),
@@ -356,7 +358,7 @@ def test_removing_silence_from_mfcc_too_hard_returns_nan_nan():
   assert np.isnan(pen)
 
 
-def test_unequal_n_fft_raises_error():
+def test_unequal_n_fft_raises_error() -> None:
   sr2, signalB = wavfile.read(AUDIO_B)
   signalB = norm_audio_signal(signalB)
   X_km_B = get_X_km(signalB, 1024, 1024, 128, "hamming")
@@ -367,13 +369,13 @@ def test_unequal_n_fft_raises_error():
     )
 
 
-def test_no_freq_bins_raises_error():
+def test_no_freq_bins_raises_error() -> None:
   X_km = np.empty((123, 0), dtype=np.complex128)
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(X_km, X_km, 22050, samples_to_ms(512, 22050))
 
 
-def test_invalid_radius_raises_error():
+def test_invalid_radius_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
       get_X_km_A(),
@@ -385,7 +387,7 @@ def test_invalid_radius_raises_error():
     )
 
 
-def test_empty_spec_returns_nan_nan():
+def test_empty_spec_returns_nan_nan() -> None:
   X_km_empty = np.empty((0, get_n_fft_bins(512)), dtype=np.complex128)
   mcd, pen = compare_amplitude_spectrograms(
     X_km_empty, get_X_km_B(), 22050, samples_to_ms(512, 22050)
@@ -406,7 +408,7 @@ def test_empty_spec_returns_nan_nan():
   assert np.isnan(pen)
 
 
-def test_invalid_silence_removal_raises_error():
+def test_invalid_silence_removal_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
       get_X_km_A(),
@@ -417,28 +419,28 @@ def test_invalid_silence_removal_raises_error():
     )
 
 
-def test_invalid_aligning_raises_error():
+def test_invalid_aligning_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
       get_X_km_A(), get_X_km_B(), 22050, samples_to_ms(512, 22050), aligning="none"
     )
 
 
-def test_invalid_align_target_raises_error():
+def test_invalid_align_target_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
       get_X_km_A(), get_X_km_B(), 22050, samples_to_ms(512, 22050), align_target="none"
     )
 
 
-def test_invalid_sample_rate_raises_error():
+def test_invalid_sample_rate_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
       get_X_km_A(), get_X_km_B(), 0, samples_to_ms(512, 22050)
     )
 
 
-def test_invalid_n_fft_raises_error():
+def test_invalid_n_fft_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(get_X_km_A(), get_X_km_B(), 22050, 0)
 
@@ -448,27 +450,27 @@ def test_invalid_n_fft_raises_error():
     )
 
 
-def test_n_fft_one_larger_raises_no_error():
+def test_n_fft_one_larger_raises_no_error() -> None:
   compare_amplitude_spectrograms(
     get_X_km_A(), get_X_km_B(), 22050, samples_to_ms(513, 22050)
   )
 
 
-def test_invalid_fmin_raises_error():
+def test_invalid_fmin_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
       get_X_km_A(), get_X_km_B(), 22050, samples_to_ms(512, 22050), fmin=-1
     )
 
 
-def test_invalid_fmax_raises_error():
+def test_invalid_fmax_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
       get_X_km_A(), get_X_km_B(), 22050, samples_to_ms(512, 22050), fmax=0
     )
 
 
-def test_invalid_remove_silence_raises_error():
+def test_invalid_remove_silence_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
       get_X_km_A(),
@@ -479,7 +481,7 @@ def test_invalid_remove_silence_raises_error():
     )
 
 
-def test_invalid_silence_threshold_raises_error():
+def test_invalid_silence_threshold_raises_error() -> None:
   # A None
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
@@ -570,7 +572,7 @@ def test_invalid_silence_threshold_raises_error():
     )
 
 
-def test_removing_silence_after_aligning_raises_error():
+def test_removing_silence_after_aligning_raises_error() -> None:
   # mel after spec was aligned
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
@@ -617,14 +619,14 @@ def test_removing_silence_after_aligning_raises_error():
     )
 
 
-def test_D_greater_than_M_raises_error():
+def test_D_greater_than_M_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
       get_X_km_A(), get_X_km_B(), 22050, samples_to_ms(512, 22050), M=10, D=11
     )
 
 
-def test_invalid_D_raises_error():
+def test_invalid_D_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
       get_X_km_A(), get_X_km_B(), 22050, samples_to_ms(512, 22050), D=0
@@ -636,48 +638,45 @@ def test_invalid_D_raises_error():
     )
 
 
-def test_invalid_M_raises_error():
+def test_invalid_M_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
       get_X_km_A(), get_X_km_B(), 22050, samples_to_ms(512, 22050), M=0
     )
 
 
-def test_invalid_s_raises_error():
+def test_invalid_s_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
       get_X_km_A(), get_X_km_B(), 22050, samples_to_ms(512, 22050), s=-1
     )
 
 
-def test_s_equals_D_raises_error():
+def test_s_equals_D_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
       get_X_km_A(), get_X_km_B(), 22050, samples_to_ms(512, 22050), s=12, D=12
     )
 
 
-def test_s_bigger_than_D_raises_error():
+def test_s_bigger_than_D_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_amplitude_spectrograms(
       get_X_km_A(), get_X_km_B(), 22050, samples_to_ms(512, 22050), s=13, D=12
     )
 
 
-def create_other_outputs():
+def create_other_outputs() -> None:
   targets = []
 
-  # fmax
-  for fmax in [None, 8000, 6000, 4000, 2000]:
-    targets.append((0, fmax, 80, 1, 13, 1))
-
   # fmin
-  for fmin in [0, 1000, 2000, 4000]:
-    targets.append((fmin, 8000, 80, 1, 13, 1))
+  targets.extend([(fmin, 8000, 80, 1, 13, 1) for fmin in [0, 1000, 2000, 4000]])
+
+  # fmax
+  targets.extend([(0, fmax, 80, 1, 13, 1) for fmax in [None, 8000, 6000, 4000, 2000]])
 
   # N
-  for n in [20, 40, 60, 80]:
-    targets.append((0, 8000, n, 1, 13, 1))
+  targets.extend([(0, 8000, n, 1, 13, 1) for n in [20, 40, 60, 80]])
 
   # s, D
   for s, d in [
@@ -701,8 +700,7 @@ def create_other_outputs():
     targets.append((0, 8000, 80, s, d, 1))
 
   # dtw_radius
-  for r in [1, 2, 3, 5, 10, 20, None]:
-    targets.append((0, 8000, 80, 1, 13, r))
+  targets.extend([(0, 8000, 80, 1, 13, r) for r in [1, 2, 3, 5, 10, 20, None]])
 
   # random
   targets.extend(
@@ -732,14 +730,15 @@ def create_other_outputs():
     )
     outputs.append((fmin, fmax, n, s, d, dtw_radius, mcd, pen))
 
+  logger = getLogger(__name__)
   for vals in outputs:
-    print("\t".join(str(i) for i in vals))
+    logger.info("\t".join(str(i) for i in vals))
   (TEST_DIR / "test_compare_amplitude_spectrograms_other.pkl").write_bytes(
     pickle.dumps(outputs)
   )
 
 
-def test_other_outputs():
+def test_other_outputs() -> None:
   outputs = pickle.loads(
     (TEST_DIR / "test_compare_amplitude_spectrograms_other.pkl").read_bytes()
   )
@@ -763,7 +762,7 @@ def test_other_outputs():
     np.testing.assert_almost_equal(pen, expected_pen)
 
 
-def create_sil_outputs():
+def create_sil_outputs() -> None:
   spec_sil = 0.001
   mel_sil = -7
   mfcc_sil = 0.001
@@ -818,14 +817,16 @@ def create_sil_outputs():
     outputs.append(
       (remove_silence, sil_a, sil_b, aligning, target, dtw_radius, mcd, pen)
     )
+  logger = getLogger(__name__)
+
   for vals in outputs:
-    print("\t".join(str(i) for i in vals))
+    logger.info("\t".join(str(i) for i in vals))
   (TEST_DIR / "test_compare_amplitude_spectrograms_sil.pkl").write_bytes(
     pickle.dumps(outputs)
   )
 
 
-def test_sil_outputs():
+def test_sil_outputs() -> None:
   outputs = pickle.loads(
     (TEST_DIR / "test_compare_amplitude_spectrograms_sil.pkl").read_bytes()
   )

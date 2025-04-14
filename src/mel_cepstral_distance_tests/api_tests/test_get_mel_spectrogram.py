@@ -1,7 +1,9 @@
 import pickle
+from logging import getLogger
 from pathlib import Path
 
 import numpy as np
+import numpy.testing as npt
 import pytest
 
 from mel_cepstral_distance.api import get_amplitude_spectrogram, get_mel_spectrogram
@@ -16,30 +18,43 @@ N_FFT = samples_to_ms(512, 22050)
 SR = 22050
 
 
-def test_one_dim_raises_error():
+def test_one_dim_raises_error() -> None:
   with pytest.raises(ValueError):
     get_mel_spectrogram(np.zeros(302), SR, N_FFT)
 
 
-def test_three_dim_raises_error():
+def test_three_dim_raises_error() -> None:
   with pytest.raises(ValueError):
     get_mel_spectrogram(np.zeros((302, 353, 3)), SR, N_FFT)
 
 
-def test_no_freq_bins_raises_error():
+def test_no_freq_bins_raises_error() -> None:
   with pytest.raises(ValueError):
     get_mel_spectrogram(np.zeros((302, 0)), SR, N_FFT)
 
 
-def get_X_km():
-  return get_amplitude_spectrogram(AUDIO_A, sample_rate=SR, n_fft=N_FFT, window="hamming", hop_len=16, norm_audio=False, remove_silence=False, win_len=N_FFT)
-
-
-def test_result_changes_after_silence_removal():
-  res = get_mel_spectrogram(
-    get_X_km(), SR, N_FFT,
+def get_X_km() -> npt.NDArray[np.complex128]:
+  return get_amplitude_spectrogram(
+    AUDIO_A,
+    sample_rate=SR,
+    n_fft=N_FFT,
+    window="hamming",
+    hop_len=16,
+    norm_audio=False,
     remove_silence=False,
-    fmin=0, fmax=SR // 2, M=20,
+    win_len=N_FFT,
+  )
+
+
+def test_result_changes_after_silence_removal() -> None:
+  res = get_mel_spectrogram(
+    get_X_km(),
+    SR,
+    N_FFT,
+    remove_silence=False,
+    fmin=0,
+    fmax=SR // 2,
+    M=20,
   )
 
   assert res.shape == (303, 20)
@@ -47,16 +62,20 @@ def test_result_changes_after_silence_removal():
   mean = get_loudness_vals_X_km(get_X_km()).mean()
 
   res = get_mel_spectrogram(
-    get_X_km(), SR, N_FFT,
+    get_X_km(),
+    SR,
+    N_FFT,
     remove_silence=True,
     silence_threshold=mean,
-    fmax=SR // 2, fmin=0, M=20,
+    fmax=SR // 2,
+    fmin=0,
+    M=20,
   )
 
   assert res.shape == (124, 20)
 
 
-def test_invalid_n_fft_raises_error():
+def test_invalid_n_fft_raises_error() -> None:
   with pytest.raises(ValueError):
     get_mel_spectrogram(get_X_km(), SR, 0)
 
@@ -64,91 +83,102 @@ def test_invalid_n_fft_raises_error():
     get_mel_spectrogram(get_X_km(), SR, samples_to_ms(512 - 1, 22050))
 
 
-def test_n_fft_one_larger_raises_no_error():
+def test_n_fft_one_larger_raises_no_error() -> None:
   get_mel_spectrogram(get_X_km(), SR, samples_to_ms(512 + 1, 22050))
 
 
-def test_invalid_M_raises_error():
+def test_invalid_M_raises_error() -> None:
   with pytest.raises(ValueError):
     get_mel_spectrogram(get_X_km(), SR, N_FFT, M=0)
 
 
-def test_invalid_fmin_raises_error():
+def test_invalid_fmin_raises_error() -> None:
   with pytest.raises(ValueError):
     get_mel_spectrogram(get_X_km(), SR, N_FFT, fmin=-1)
 
 
-def test_invalid_fmax_raises_error():
+def test_invalid_fmax_raises_error() -> None:
   with pytest.raises(ValueError):
     get_mel_spectrogram(get_X_km(), SR, N_FFT, fmax=0)
 
 
-def test_invalid_sample_rate_raises_error():
+def test_invalid_sample_rate_raises_error() -> None:
   with pytest.raises(ValueError):
     get_mel_spectrogram(get_X_km(), 0, N_FFT)
 
 
-def test_no_silence_threshold_raises_error():
+def test_no_silence_threshold_raises_error() -> None:
   with pytest.raises(ValueError):
-    get_mel_spectrogram(get_X_km(), SR, N_FFT, remove_silence=True, silence_threshold=None)
+    get_mel_spectrogram(
+      get_X_km(), SR, N_FFT, remove_silence=True, silence_threshold=None
+    )
 
 
-def test_removing_silence_from_sig_too_hard_returns_empty():
+def test_removing_silence_from_sig_too_hard_returns_empty() -> None:
   loudness_max = get_loudness_vals_X_km(get_X_km()).max()
   res = get_mel_spectrogram(
-    get_X_km(), SR, N_FFT,
+    get_X_km(),
+    SR,
+    N_FFT,
     remove_silence=True,
     silence_threshold=loudness_max + 1,
-    fmax=SR // 2, fmin=0, M=20,
+    fmax=SR // 2,
+    fmin=0,
+    M=20,
   )
 
   assert res.shape == (0, 20)
 
 
-def test_empty_spec_returns_empty():
+def test_empty_spec_returns_empty() -> None:
   empty_spec = np.empty((0, get_n_fft_bins(512)), dtype=np.int16)
 
   res = get_mel_spectrogram(
-    empty_spec, SR, N_FFT,
+    empty_spec,
+    SR,
+    N_FFT,
     remove_silence=False,
-    fmax=SR // 2, fmin=0, M=20,
+    fmax=SR // 2,
+    fmin=0,
+    M=20,
   )
 
   assert res.shape == (0, 20)
 
 
-def create_outputs():
+def create_outputs() -> None:
   targets = []
 
   # fmax
-  for fmax in [None, 8000, 6000, 4000, 2000]:
-    targets.append((
-      0, fmax, 80, None,
-    ))
+  targets.extend([(0, fmax, 80, None) for fmax in [None, 8000, 6000, 4000, 2000]])
 
   # fmin
-  for fmin in [0, 1000, 2000, 4000]:
-    targets.append((
-      fmin, 8000, 80, None,
-    ))
+  targets.extend([(fmin, 8000, 80, None) for fmin in [0, 1000, 2000, 4000]])
 
   # N
-  for n in [20, 40, 60, 80]:
-    targets.append((
-      0, 8000, n, None,
-    ))
+  targets.extend(
+    [
+      (
+        0,
+        8000,
+        n,
+        None,
+      )
+      for n in [20, 40, 60, 80]
+    ]
+  )
 
   # silence removal
   for sil_rem in [None, 70, 8000, 100000]:
-    targets.extend((
-      (0, 8000, 80, sil_rem),
-    ))
+    targets.extend(((0, 8000, 80, sil_rem),))
 
   outputs = []
 
   for fmin, fmax, n, sil_removal in targets:
     spec = get_mel_spectrogram(
-      get_X_km(), SR, N_FFT,
+      get_X_km(),
+      SR,
+      N_FFT,
       fmin=fmin,
       fmax=fmax,
       M=n,
@@ -157,16 +187,23 @@ def create_outputs():
     )
     outputs.append((fmin, fmax, n, sil_removal, spec))
 
+  logger = getLogger(__name__)
   for vals in outputs:
-    print("\t".join(str(i) if not isinstance(i, np.ndarray) else str(np.mean(i)) for i in vals))
+    logger.info(
+      "\t".join(
+        str(i) if not isinstance(i, np.ndarray) else str(np.mean(i)) for i in vals
+      )
+    )
   (TEST_DIR / "test_get_mel_spectrogram.pkl").write_bytes(pickle.dumps(outputs))
 
 
-def test_outputs():
+def test_outputs() -> None:
   outputs = pickle.loads((TEST_DIR / "test_get_mel_spectrogram.pkl").read_bytes())
   for fmin, fmax, n, sil_removal, expected_spec in outputs:
     spec = get_mel_spectrogram(
-      get_X_km(), SR, N_FFT,
+      get_X_km(),
+      SR,
+      N_FFT,
       fmin=fmin,
       fmax=fmax,
       M=n,

@@ -8,7 +8,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10567255.svg)](https://doi.org/10.5281/zenodo.10567255)
 [![Downloads](https://static.pepy.tech/badge/mel-cepstral-distance)](https://pepy.tech/project/mel-cepstral-distance)
 
-Python library to compute the Mel-Cepstral Distance (also called Mel-Cepstral Distortion) of two audio signals based on [Mel-Cepstral Distance Measure for Objective Speech Quality Assessment](https://ieeexplore.ieee.org/document/407206) by Robert F. Kubichek.
+Python library to compute the Mel-Cepstral Distance (also called Mel-Cepstral Distortion, MCD) of two audio signals based on [Mel-Cepstral Distance Measure for Objective Speech Quality Assessment](https://ieeexplore.ieee.org/document/407206) by Robert F. Kubichek.
 
 ## ** Note on the new version [2024/12/05] **
 
@@ -169,15 +169,15 @@ Where:
 
 - [1] Kubichek, R. (1993). Mel-cepstral distance measure for objective speech quality assessment. Proceedings of IEEE Pacific Rim Conference on Communications Computers and Signal Processing, 1, 125–128. https://doi.org/10.1109/PACRIM.1993.407206 
 - [2] Lee, Y., & Kim, T. (2019). Robust and Fine-grained Prosody Control of End-to-end Speech Synthesis. ICASSP 2019 - 2019 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 5911–5915. https://doi.org/10.1109/ICASSP.2019.8683501
-- [3] Ref-Tacotron -> Skerry-Ryan, R. J., Battenberg, E., Xiao, Y., Wang, Y., Stanton, D., Shor, J., Weiss, R., Clark, R., & Saurous, R. A. (2018). Towards End-to-End Prosody Transfer for Expressive Speech Synthesis with Tacotron. Proceedings of the 35th International Conference on Machine Learning, 4693–4702. https://proceedings.mlr.press/v80/skerry-ryan18a.html
+- [3] **Ref-Tacotron** -> Skerry-Ryan, R. J., Battenberg, E., Xiao, Y., Wang, Y., Stanton, D., Shor, J., Weiss, R., Clark, R., & Saurous, R. A. (2018). Towards End-to-End Prosody Transfer for Expressive Speech Synthesis with Tacotron. Proceedings of the 35th International Conference on Machine Learning, 4693–4702. https://proceedings.mlr.press/v80/skerry-ryan18a.html
 - [4] Nature/ansp19-503 Anumanchipalli, G. K., Chartier, J., & Chang, E. F. (2019). Speech synthesis from neural decoding of spoken sentences. Nature, 568(7753), Article 7753. https://doi.org/10.1038/s41586-019-1119-1
 - [5] Shah, N. J., Vachhani, B. B., Sailor, H. B., & Patil, H. A. (2014). Effectiveness of PLP-based phonetic segmentation for speech synthesis. 2014 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 270–274. https://doi.org/10.1109/ICASSP.2014.6853600
 - [6] Kominek, J., Schultz, T., & Black, A. W. (2008). Synthesizer voice quality of new languages calibrated with mean mel cepstral distortion. SLTU, 63–68. http://www.cs.cmu.edu/~./awb/papers/sltu2008/kominek_black.sltu_2008.pdf
 - [7] Mashimo, M., Toda, T., Shikano, K., & Campbell, N. (2001). Evaluation of cross-language voice conversion based on GMM and straight. 7th European Conference on Speech Communication and Technology (Eurospeech 2001), 361–364. https://doi.org/10.21437/Eurospeech.2001-111
-- [8] Capacitron -> Battenberg, E., Mariooryad, S., Stanton, D., Skerry-Ryan, R. J., Shannon, M., Kao, D., & Bagby, T. (2019). Effective Use of Variational Embedding Capacity in Expressive End-to-End Speech Synthesis (No. arXiv:1906.03402). arXiv. http://arxiv.org/abs/1906.03402
-- [9] Attentron -> Choi, S., Han, S., Kim, D., & Ha, S. (2020). Attentron: Few-Shot Text-to-Speech Utilizing Attention-Based Variable-Length Embedding. Interspeech 2020, 2007–2011. https://doi.org/10.21437/Interspeech.2020-2096
-- [10] VoiceLoop -> Taigman, Y., Wolf, L., Polyak, A., & Nachmani, E. (2018). VoiceLoop: Voice Fitting and Synthesis via a Phonological Loop. 6th International Conference on Learning Representations (ICLR 2018), 2, 1374–1387. https://openreview.net/forum?id=SkFAWax0-
-- [11] MIST-Tacotron -> Moon, S., Kim, S., & Choi, Y.-H. (2022). MIST-Tacotron: End-to-End Emotional Speech Synthesis Using Mel-Spectrogram Image Style Transfer. IEEE Access, 10, 25455–25463. IEEE Access. https://doi.org/10.1109/ACCESS.2022.3156093
+- [8] **Capacitron** -> Battenberg, E., Mariooryad, S., Stanton, D., Skerry-Ryan, R. J., Shannon, M., Kao, D., & Bagby, T. (2019). Effective Use of Variational Embedding Capacity in Expressive End-to-End Speech Synthesis (No. arXiv:1906.03402). arXiv. http://arxiv.org/abs/1906.03402
+- [9] **Attentron** -> Choi, S., Han, S., Kim, D., & Ha, S. (2020). Attentron: Few-Shot Text-to-Speech Utilizing Attention-Based Variable-Length Embedding. Interspeech 2020, 2007–2011. https://doi.org/10.21437/Interspeech.2020-2096
+- [10] **VoiceLoop** -> Taigman, Y., Wolf, L., Polyak, A., & Nachmani, E. (2018). VoiceLoop: Voice Fitting and Synthesis via a Phonological Loop. 6th International Conference on Learning Representations (ICLR 2018), 2, 1374–1387. https://openreview.net/forum?id=SkFAWax0-
+- [11] **MIST-Tacotron** -> Moon, S., Kim, S., & Choi, Y.-H. (2022). MIST-Tacotron: End-to-End Emotional Speech Synthesis Using Mel-Spectrogram Image Style Transfer. IEEE Access, 10, 25455–25463. IEEE Access. https://doi.org/10.1109/ACCESS.2022.3156093
 - [12] Kim, J., Choi, H., Park, J., Hahn, M., Kim, S., & Kim, J.-J. (2018). Korean Singing Voice Synthesis Based on an LSTM Recurrent Neural Network. Interspeech 2018, 1551–1555. https://doi.org/10.21437/Interspeech.2018-1575
 
 #### Default parameters

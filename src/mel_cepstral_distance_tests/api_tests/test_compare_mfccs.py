@@ -1,7 +1,9 @@
 import pickle
+from logging import getLogger
 from pathlib import Path
 
 import numpy as np
+import numpy.testing as npt
 import pytest
 from scipy.io import wavfile
 
@@ -17,7 +19,7 @@ AUDIO_B = TEST_DIR / "B.wav"
 M = 80
 
 
-def test_zero_dim_return_raises_error():
+def test_zero_dim_return_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_mfccs(np.zeros((0, M)), get_MC_Y_ik_B())
 
@@ -28,7 +30,7 @@ def test_zero_dim_return_raises_error():
     compare_mfccs(np.zeros((0, M)), np.zeros((0, M)))
 
 
-def test_one_dim_raises_error():
+def test_one_dim_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_mfccs(np.zeros(302), get_MC_Y_ik_B())
 
@@ -39,7 +41,7 @@ def test_one_dim_raises_error():
     compare_mfccs(np.zeros(302), np.zeros(302))
 
 
-def test_three_dim_raises_error():
+def test_three_dim_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_mfccs(np.zeros((302, M, 3)), get_MC_Y_ik_B())
 
@@ -50,7 +52,7 @@ def test_three_dim_raises_error():
     compare_mfccs(np.zeros((302, M, 3)), np.zeros((302, M, 3)))
 
 
-def get_MC_X_ik_A():
+def get_MC_X_ik_A() -> npt.NDArray[np.complex128]:
   sr1, signalA = wavfile.read(AUDIO_A)
   signalA = norm_audio_signal(signalA)
   X_km = get_X_km(signalA, 512, 512, 128, "hamming")
@@ -60,7 +62,7 @@ def get_MC_X_ik_A():
   return MC_X_ik
 
 
-def get_MC_Y_ik_B():
+def get_MC_Y_ik_B() -> npt.NDArray[np.complex128]:
   sr2, signalB = wavfile.read(AUDIO_B)
   signalB = norm_audio_signal(signalB)
   X_km = get_X_km(signalB, 512, 512, 128, "hamming")
@@ -71,7 +73,7 @@ def get_MC_Y_ik_B():
   return MC_Y_ik
 
 
-def test_same_mfccs_returns_zero():
+def test_same_mfccs_returns_zero() -> None:
   mcd, pen = compare_mfccs(
     get_MC_X_ik_A(),
     get_MC_X_ik_A(),
@@ -85,7 +87,7 @@ def test_same_mfccs_returns_zero():
   assert pen == 0
 
 
-def test_removing_silence_too_hard_returns_nan_nan():
+def test_removing_silence_too_hard_returns_nan_nan() -> None:
   mcd, pen = compare_mfccs(
     get_MC_X_ik_A(),
     get_MC_Y_ik_B(),
@@ -129,7 +131,7 @@ def test_removing_silence_too_hard_returns_nan_nan():
   assert np.isnan(pen)
 
 
-def test_empty_returns_nan_nan():
+def test_empty_returns_nan_nan() -> None:
   MC_empty = np.empty((M, 0))
   mcd, pen = compare_mfccs(MC_empty, get_MC_Y_ik_B())
   assert np.isnan(mcd)
@@ -144,17 +146,17 @@ def test_empty_returns_nan_nan():
   assert np.isnan(pen)
 
 
-def test_invalid_aligning_raises_error():
+def test_invalid_aligning_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_mfccs(get_MC_X_ik_A(), get_MC_Y_ik_B(), aligning="none")
 
 
-def test_invalid_remove_silence_raises_error():
+def test_invalid_remove_silence_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_mfccs(get_MC_X_ik_A(), get_MC_Y_ik_B(), remove_silence="none")
 
 
-def test_invalid_silence_threshold_raises_error():
+def test_invalid_silence_threshold_raises_error() -> None:
   # A None
   with pytest.raises(ValueError):
     compare_mfccs(
@@ -176,12 +178,12 @@ def test_invalid_silence_threshold_raises_error():
     )
 
 
-def test_D_greater_than_M_raises_error():
+def test_D_greater_than_M_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_mfccs(get_MC_X_ik_A(), get_MC_Y_ik_B(), D=M + 1)
 
 
-def test_invalid_D_raises_error():
+def test_invalid_D_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_mfccs(get_MC_X_ik_A(), get_MC_Y_ik_B(), D=0)
 
@@ -189,29 +191,29 @@ def test_invalid_D_raises_error():
     compare_mfccs(get_MC_X_ik_A(), get_MC_Y_ik_B(), D=1)
 
 
-def test_invalid_s_raises_error():
+def test_invalid_s_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_mfccs(get_MC_X_ik_A(), get_MC_Y_ik_B(), s=-1)
 
 
-def test_s_equals_D_raises_error():
+def test_s_equals_D_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_mfccs(get_MC_X_ik_A(), get_MC_Y_ik_B(), s=12, D=12)
 
 
-def test_s_bigger_than_D_raises_error():
+def test_s_bigger_than_D_raises_error() -> None:
   with pytest.raises(ValueError):
     compare_mfccs(get_MC_X_ik_A(), get_MC_Y_ik_B(), s=13, D=12)
 
 
-def test_invalid_radius_raises_error():
+def test_invalid_radius_raises_error() -> None:
   with pytest.raises(
     ValueError, match="dtw_radius must be None or greater than or equal to 1"
   ):
     compare_mfccs(get_MC_X_ik_A(), get_MC_Y_ik_B(), aligning="dtw", dtw_radius=0)
 
 
-def create_other_outputs():
+def create_other_outputs() -> None:
   targets = []
 
   # s, D
@@ -236,8 +238,7 @@ def create_other_outputs():
     targets.append((s, d, 1))
 
   # dtw_radius
-  for dtw_radius in [1, 10, 20, None]:
-    targets.append((1, 13, dtw_radius))
+  targets.extend([(1, 13, dtw_radius) for dtw_radius in [1, 10, 20, None]])
 
   outputs = []
 
@@ -253,12 +254,13 @@ def create_other_outputs():
     )
     outputs.append((s, d, dtw_radius, mcd, pen))
 
+  logger = getLogger(__name__)
   for vals in outputs:
-    print("\t".join(str(i) for i in vals))
+    logger.info("\t".join(str(i) for i in vals))
   (TEST_DIR / "test_compare_mfccs_other.pkl").write_bytes(pickle.dumps(outputs))
 
 
-def test_other_outputs():
+def test_other_outputs() -> None:
   outputs = pickle.loads((TEST_DIR / "test_compare_mfccs_other.pkl").read_bytes())
   for s, d, dtw_radius, expected_mcd, expected_pen in outputs:
     mcd, pen = compare_mfccs(
@@ -274,7 +276,7 @@ def test_other_outputs():
     np.testing.assert_almost_equal(pen, expected_pen)
 
 
-def create_sil_outputs():
+def create_sil_outputs() -> None:
   mfcc_sil = 0.001
 
   targets = [
@@ -305,12 +307,14 @@ def create_sil_outputs():
       D=13,
     )
     outputs.append((remove_silence, sil_a, sil_b, aligning, dtw_radius, mcd, pen))
+
+  logger = getLogger(__name__)
   for vals in outputs:
-    print("\t".join(str(i) for i in vals))
+    logger.info("\t".join(str(i) for i in vals))
   (TEST_DIR / "test_compare_mfccs_sil.pkl").write_bytes(pickle.dumps(outputs))
 
 
-def test_sil_outputs():
+def test_sil_outputs() -> None:
   outputs = pickle.loads((TEST_DIR / "test_compare_mfccs_sil.pkl").read_bytes())
   for (
     remove_silence,

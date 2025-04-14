@@ -41,16 +41,16 @@ def get_amplitude_spectrogram(
   remove_silence: bool = False,
   silence_threshold: Optional[float] = None,
 ) -> npt.NDArray[np.complex128]:
-  if sample_rate is not None and not 0 < sample_rate:
+  if sample_rate is not None and not sample_rate > 0:
     raise ValueError("sample_rate must be > 0")
 
   if not n_fft > 0:
     raise ValueError("n_fft must be > 0")
 
-  if not 0 < win_len:
+  if not win_len > 0:
     raise ValueError("win_len must be > 0")
 
-  if not 0 < hop_len:
+  if not hop_len > 0:
     raise ValueError("hop_len must be > 0")
 
   if window not in ["hamming", "hanning"]:
@@ -98,7 +98,7 @@ def get_amplitude_spectrogram(
     if silence_threshold is None:
       raise ValueError("silence_threshold must be set")
 
-    if not 0 <= silence_threshold:
+    if not silence_threshold >= 0:
       raise ValueError("silence_threshold must be greater than or equal to 0 RMS")
 
     signal = remove_silence_rms(
@@ -148,10 +148,10 @@ def get_mel_spectrogram(
   if amp_spec.shape[1] == 0:
     raise ValueError("spectrogram must have at least 1 frequency bin")
 
-  if not 0 < n_fft:
+  if not n_fft > 0:
     raise ValueError("n_fft must be > 0")
 
-  if not 0 < sample_rate:
+  if not sample_rate > 0:
     raise ValueError("sample_rate must be > 0")
 
   if fmax is not None:
@@ -249,8 +249,7 @@ def compare_audio_files(
   norm_audio: bool = True,
   dtw_radius: Optional[int] = 10,
 ) -> Tuple[float, float]:
-  """
-  - silence is removed before alignment
+  """- silence is removed before alignment
   - high freq is max sr/2
   - n_fft should be equal to win_len
   - n_fft should be a power of 2 in samples
@@ -262,16 +261,16 @@ def compare_audio_files(
   if remove_silence not in ["no", "sig", "spec", "mel", "mfcc"]:
     raise ValueError("remove_silence must be 'no', 'sig', 'spec', 'mel' or 'mfcc'")
 
-  if sample_rate is not None and not 0 < sample_rate:
+  if sample_rate is not None and not sample_rate > 0:
     raise ValueError("sample_rate must be > 0")
 
   if not n_fft > 0:
     raise ValueError("n_fft must be > 0")
 
-  if not 0 < win_len:
+  if not win_len > 0:
     raise ValueError("win_len must be > 0")
 
-  if not 0 < hop_len:
+  if not hop_len > 0:
     raise ValueError("hop_len must be > 0")
 
   if window not in ["hamming", "hanning"]:
@@ -334,10 +333,10 @@ def compare_audio_files(
     if silence_threshold_B is None:
       raise ValueError("silence_threshold_B must be set")
 
-    if not 0 <= silence_threshold_A:
+    if not silence_threshold_A >= 0:
       raise ValueError("silence_threshold_A must be greater than or equal to 0 RMS")
 
-    if not 0 <= silence_threshold_B:
+    if not silence_threshold_B >= 0:
       raise ValueError("silence_threshold_B must be greater than or equal to 0 RMS")
 
     signalA = remove_silence_rms(
@@ -501,7 +500,7 @@ def compare_amplitude_spectrograms(
   penalty: float
   aligned_here: bool = False
   if align_target == "spec":
-    if aligning == "dtw" and dtw_radius is not None and not 1 <= dtw_radius:
+    if aligning == "dtw" and dtw_radius is not None and not dtw_radius >= 1:
       raise ValueError("dtw_radius must be None or greater than or equal to 1")
     amp_spec_A, amp_spec_B, penalty = align_X_km(
       amp_spec_A, amp_spec_B, aligning, dtw_radius
@@ -622,7 +621,7 @@ def compare_mel_spectrograms(
   penalty: float
   aligned_here: bool = False
   if align_target == "mel":
-    if aligning == "dtw" and dtw_radius is not None and not 1 <= dtw_radius:
+    if aligning == "dtw" and dtw_radius is not None and not dtw_radius >= 1:
       raise ValueError("dtw_radius must be None or greater than or equal to 1")
     mel_spec_A, mel_spec_B, penalty = align_X_kn(
       mel_spec_A, mel_spec_B, aligning, dtw_radius
@@ -726,7 +725,7 @@ def compare_mfccs(
       logger.warning("after removing silence, MFCCs B are empty")
       return np.nan, np.nan
 
-  if aligning == "dtw" and dtw_radius is not None and not 1 <= dtw_radius:
+  if aligning == "dtw" and dtw_radius is not None and not dtw_radius >= 1:
     raise ValueError("dtw_radius must be None or greater than or equal to 1")
 
   mfccs_A, mfccs_B, penalty = align_MC_s_D(mfccs_A, mfccs_B, s, D, aligning, dtw_radius)

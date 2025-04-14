@@ -60,8 +60,7 @@ def mel_to_hz(mel: Union[float, npt.NDArray]) -> Union[float, npt.NDArray]:
 
 
 def energy_to_bel(energy: npt.NDArray) -> npt.NDArray:
-  """
-  Converts energy to bels
+  """Converts energy to bels
   """
   result: npt.NDArray = np.log10(energy + np.finfo(float).eps)
   return result

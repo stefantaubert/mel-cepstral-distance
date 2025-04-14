@@ -99,7 +99,15 @@ select = [
     # flake8-simplify
     "SIM",
     # isort
-    "I",
+    "I",    
+    "C4",
+    "T20",     
+    "PERF",
+    "ANN",
+    "TID",
+    "EXE",
+    "W",
+    "D",
 ]
 
 [tool.ruff.format]

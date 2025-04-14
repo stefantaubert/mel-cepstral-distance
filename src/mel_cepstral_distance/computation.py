@@ -15,7 +15,7 @@ from mel_cepstral_distance.helper import (
 def adjust_win_len_to_n_fft(
   windowed_frames: npt.NDArray, n_fft: int
 ) -> Tuple[npt.NDArray, int]:
-  """padding or truncating the frames to n_fft"""
+  """Padding or truncating the frames to n_fft"""
   win_len = windowed_frames.shape[1]
   if win_len < n_fft:
     windowed_frames = np.pad(
@@ -35,8 +35,7 @@ def get_X_km(
   hop_length: float,
   window: Literal["hamming", "hanning"],
 ) -> npt.NDArray[np.complex128]:
-  """
-  Short-Time Fourier Transform (STFT)
+  """Short-Time Fourier Transform (STFT)
   returns amplitude spectrogram with shape (#frames, n_fft // 2 + 1)
   """
   assert window in ["hamming", "hanning"]
@@ -63,7 +62,7 @@ def get_X_km(
 def get_w_n_m(
   sample_rate: int, n_fft: int, M: int, fmin: float, fmax: float
 ) -> npt.NDArray:
-  """calculates a Mel filter bank"""
+  """Calculates a Mel filter bank"""
   # M: number of mel bands
   assert sample_rate > 0
   assert M > 0
@@ -88,8 +87,7 @@ def get_w_n_m(
 
 
 def get_X_kn(X_km: npt.NDArray[np.complex128], w_n_m: npt.NDArray) -> npt.NDArray:
-  """
-  Calculates the energy mel spectrogram (Bel) of the linear amplitude spectrogram
+  """Calculates the energy mel spectrogram (Bel) of the linear amplitude spectrogram
   returns mel spectrogram with shape (#frames, N)
   """
   assert X_km.shape[1] == w_n_m.shape[1], (
@@ -105,15 +103,14 @@ def get_X_kn(X_km: npt.NDArray[np.complex128], w_n_m: npt.NDArray) -> npt.NDArra
 
 
 def get_MC_X_ik(X_kn: npt.NDArray, M: int) -> npt.NDArray:
-  """
-  Calculates the mel cepstrum coefficients of the mel spectrogram
+  """Calculates the mel cepstrum coefficients of the mel spectrogram
   returns mel cepstrum with shape (M, #frames)
   """
   # K: total frame count
   # M: number of cepstral coefficients
   assert X_kn.ndim == 2, f"Expected a 2D array, but got {X_kn.ndim} dimensions"
   assert isinstance(M, int) and M > 0, "M must be a positive integer"
-  assert M <= X_kn.shape[1], (
+  assert X_kn.shape[1] >= M, (
     "M must be less than or equal to the number of mel bands (columns) in X_kn"
   )
 

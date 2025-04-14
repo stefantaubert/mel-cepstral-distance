@@ -14,8 +14,7 @@ def align_X_km(
   aligning: Literal["dtw", "pad"],
   custom_radius: Optional[int],
 ) -> Tuple[npt.NDArray[np.complex128], npt.NDArray[np.complex128], float]:
-  """
-  Aligns two 2D sequences of complex numbers using either Dynamic Time Warping (DTW)
+  """Aligns two 2D sequences of complex numbers using either Dynamic Time Warping (DTW)
   or padding with zeros. For DTW, the sequences are temporarily converted to
   magnitude spectrograms.
   """

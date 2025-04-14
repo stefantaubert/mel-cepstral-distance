@@ -18,7 +18,7 @@ SR = 22050
 
 def test_one_dim_raises_error():
   with pytest.raises(ValueError):
-    get_mel_spectrogram(np.zeros((302)), SR, N_FFT)
+    get_mel_spectrogram(np.zeros(302), SR, N_FFT)
 
 
 def test_three_dim_raises_error():

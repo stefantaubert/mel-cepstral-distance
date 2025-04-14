@@ -35,13 +35,13 @@ def test_zero_dim_spec_raise_error():
 
 def test_one_dim_spec_raise_error():
   with pytest.raises(ValueError):
-    compare_amplitude_spectrograms(get_X_km_A(), np.empty((305)), SR, N_FFT)
+    compare_amplitude_spectrograms(get_X_km_A(), np.empty(305), SR, N_FFT)
 
   with pytest.raises(ValueError):
-    compare_amplitude_spectrograms(np.empty((305)), get_X_km_A(), SR, N_FFT)
+    compare_amplitude_spectrograms(np.empty(305), get_X_km_A(), SR, N_FFT)
 
   with pytest.raises(ValueError):
-    compare_amplitude_spectrograms(np.empty((305)), np.empty((305)), SR, N_FFT)
+    compare_amplitude_spectrograms(np.empty(305), np.empty(305), SR, N_FFT)
 
 
 def test_three_dim_spec_raise_error():

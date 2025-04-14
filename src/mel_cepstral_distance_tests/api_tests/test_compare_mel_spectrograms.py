@@ -30,13 +30,13 @@ def test_zero_dim_spec_raise_error():
 
 def test_one_dim_spec_raise_error():
   with pytest.raises(ValueError):
-    compare_mel_spectrograms(get_X_kn_A(), np.empty((305)))
+    compare_mel_spectrograms(get_X_kn_A(), np.empty(305))
 
   with pytest.raises(ValueError):
-    compare_mel_spectrograms(np.empty((305)), get_X_kn_A())
+    compare_mel_spectrograms(np.empty(305), get_X_kn_A())
 
   with pytest.raises(ValueError):
-    compare_mel_spectrograms(np.empty((305)), np.empty((305)))
+    compare_mel_spectrograms(np.empty(305), np.empty(305))
 
 
 def test_three_dim_spec_raise_error():

@@ -4,7 +4,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from mel_cepstral_distance.api import get_amplitude_spectrogram, get_mel_spectrogram, get_mfccs
+from mel_cepstral_distance.api import (
+  get_amplitude_spectrogram,
+  get_mel_spectrogram,
+  get_mfccs,
+)
 from mel_cepstral_distance.helper import samples_to_ms
 from mel_cepstral_distance.silence import get_loudness_vals_X_kn
 

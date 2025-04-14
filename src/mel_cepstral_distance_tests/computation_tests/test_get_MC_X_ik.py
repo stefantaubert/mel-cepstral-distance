@@ -12,7 +12,7 @@ def get_MC_X_ik_from_paper(X_kn: np.ndarray, M: int) -> np.ndarray:
   # M: number of cepstral coefficients
   assert X_kn.ndim == 2, f"Expected a 2D array, but got {X_kn.ndim} dimensions"
   assert isinstance(M, int) and M > 0, "M must be a positive integer"
-  assert M <= X_kn.shape[1], "M must be less than or equal to the number of mel bands (columns) in X_kn"
+  assert X_kn.shape[1] >= M, "M must be less than or equal to the number of mel bands (columns) in X_kn"
   K: int = X_kn.shape[0]
   MC_X_ik: np.ndarray = np.zeros((M, K))
   for i in range(1, M + 1):

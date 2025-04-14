@@ -16,7 +16,7 @@ from mel_cepstral_distance.helper import get_hz_points
 
 
 def norm_w_n_m(w_n_m: npt.NDArray, method: Literal["slaney", "sum"], hz_points: npt.NDArray) -> npt.NDArray:
-  ''' normalizes the Mel filter bank '''
+  """Normalizes the Mel filter bank"""
   assert method in ["slaney", "sum"]
   M, n_fft = w_n_m.shape
   if method == "slaney":

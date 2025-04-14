@@ -30,13 +30,13 @@ def test_zero_dim_return_raises_error():
 
 def test_one_dim_raises_error():
   with pytest.raises(ValueError):
-    compare_mfccs(np.zeros((302)), get_MC_Y_ik_B())
+    compare_mfccs(np.zeros(302), get_MC_Y_ik_B())
 
   with pytest.raises(ValueError):
-    compare_mfccs(get_MC_X_ik_A(), np.zeros((302)))
+    compare_mfccs(get_MC_X_ik_A(), np.zeros(302))
 
   with pytest.raises(ValueError):
-    compare_mfccs(np.zeros((302)), np.zeros((302)))
+    compare_mfccs(np.zeros(302), np.zeros(302))
 
 
 def test_three_dim_raises_error():

@@ -121,7 +121,7 @@ Where:
 - $N_X$: The number of frames in the reference sequence.
 - $N_Y$: The number of frames in the target sequence.
 - $N_{XY}$: The number of frames after alignment (same for X and Y).
-- $PEN$: A value in interval [$0$, $1$), where a smaller value indicates less alignment.
+- $PEN$: A value in interval $[0, 1)$, where a smaller value indicates less alignment.
 
 ### Used parameters in literature
 

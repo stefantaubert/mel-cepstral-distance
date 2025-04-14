@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 title: mel-cepstral-distance
-abstract: CLI and library to compute the mel-cepstral distance of two WAV files based on the paper "Mel-Cepstral Distance Measure for Objective Speech Quality Assessment" by Robert F. Kubichek.
+abstract: A Python library for computing the Mel-Cepstral Distance (also known as Mel-Cepstral Distortion, MCD) between two inputs. This implementation is based on the paper 'Mel-Cepstral Distance Measure for Objective Speech Quality Assessment' by Kubichek (1993).
 message: >-
   If you use this software, please cite it using the
   metadata from this file.
@@ -14,8 +14,8 @@ authors:
   - given-names: Jasmin
     family-names: Sternkopf
     affiliation: Chemnitz University of Technology
-version: 0.0.3
-date-released: 2024-01-25
+version: 0.0.4
+date-released: 2025-04-14
 license: MIT
 url: https://github.com/jasminsternkopf/mel_cepstral_distance
-doi: 10.5281/zenodo.10567255
+doi: 10.5281/zenodo.15213012

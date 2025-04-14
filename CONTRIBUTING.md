@@ -34,6 +34,7 @@ coverage erase
 tox
 coverage combine
 coverage html -d coverage
+coverage report -m
 ```
 
 ## Calculating test coverage

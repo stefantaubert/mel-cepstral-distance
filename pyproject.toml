@@ -1,7 +1,7 @@
 [project]
 name = "mel-cepstral-distance"
-version = "0.0.3"
-description = "A Python library for computing the Mel-Cepstral Distance (also known as Mel-Cepstral Distortion, MCD) between two audio signals. This implementation is based on Mel-Cepstral Distance Measure for Objective Speech Quality Assessment by Kubichek (1993)."
+version = "0.0.4"
+description = "A Python library for computing the Mel-Cepstral Distance (also known as Mel-Cepstral Distortion, MCD) between two inputs. This implementation is based on the paper 'Mel-Cepstral Distance Measure for Objective Speech Quality Assessment' by Kubichek (1993)."
 readme = "README.md"
 requires-python = ">=3.8, <3.14"
 license = { file = "LICENSE" }
@@ -14,6 +14,7 @@ keywords = [
   "MCD",
   "Mel",
   "DTW",
+  "MFCC",
   "Dynamic Time Warping",
   "Cepstral",
   "Spectrogram",
@@ -46,7 +47,7 @@ classifiers = [
 dependencies = ["numpy>=1.22.4", "scipy>=1.8.0", "fastdtw>=0.3.4"]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-cov", "tox", "ruff", "mypy", "rope", "build", "twine"]
+dev = ["pytest", "pytest-cov", "pytest-xdist", "tox", "ruff", "mypy", "rope", "build", "twine"]
 
 [project.urls]
 Homepage = "https://github.com/jasminsternkopf/mel_cepstral_distance"

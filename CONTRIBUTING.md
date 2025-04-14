@@ -17,7 +17,6 @@ sudo apt install python3-pip \
   python3.12 python3.12-dev python3.12-distutils python3.12-venv
   python3.13 python3.13-dev python3.13-venv
 # install pipenv for creation of virtual environments
-python3.8 -m pip install pipenv --user
 
 # check out repo
 git clone https://github.com/jasminsternkopf/mel_cepstral_distance.git

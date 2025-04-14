@@ -10,7 +10,7 @@ def amp_to_mag(X_km: npt.NDArray[np.complex128]) -> npt.NDArray:
 
 
 def mag_to_energy(X_km: npt.NDArray) -> npt.NDArray:
-  return X_km ** 2
+  return X_km**2
 
 
 def resample_if_necessary(audio: npt.NDArray, sr: int, target_sr: int) -> npt.NDArray:
@@ -18,8 +18,7 @@ def resample_if_necessary(audio: npt.NDArray, sr: int, target_sr: int) -> npt.ND
     return audio
   target_num_samples = int(len(audio) * target_sr / sr)
   resampled_audio: npt.NDArray = resample(
-    audio, target_num_samples,
-    axis=0, window=None, domain='time'
+    audio, target_num_samples, axis=0, window=None, domain="time"
   )
 
   return resampled_audio
@@ -57,12 +56,12 @@ def hz_to_mel(hz: Union[float, npt.NDArray]) -> Union[float, npt.NDArray]:
 
 def mel_to_hz(mel: Union[float, npt.NDArray]) -> Union[float, npt.NDArray]:
   assert np.all(mel >= 0), f"Expected positive mel value, but got {mel}"
-  return 700 * (10**(mel / 2595) - 1)
+  return 700 * (10 ** (mel / 2595) - 1)
 
 
 def energy_to_bel(energy: npt.NDArray) -> npt.NDArray:
-  """ 
-  Converts energy to bels 
+  """
+  Converts energy to bels
   """
   result: npt.NDArray = np.log10(energy + np.finfo(float).eps)
   return result

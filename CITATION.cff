@@ -6,12 +6,10 @@ message: >-
   metadata from this file.
 type: software
 authors:
-  - email: jasmin.sternkopf@mathematik.tu-chemnitz.de
-    given-names: Jasmin
+  - given-names: Jasmin
     family-names: Sternkopf
     affiliation: Chemnitz University of Technology
-  - email: github@stefantaubert.com
-    given-names: Stefan
+  - given-names: Stefan
     family-names: Taubert
     affiliation: Chemnitz University of Technology
     orcid: 'https://orcid.org/0000-0002-4932-2874'

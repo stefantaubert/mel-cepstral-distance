@@ -4,8 +4,14 @@ from typing import Literal
 import numpy as np
 import numpy.typing as npt
 
-from mel_cepstral_distance.computation import (get_average_MCD, get_MC_X_ik, get_MCD_k, get_w_n_m,
-                                               get_X_km, get_X_kn)
+from mel_cepstral_distance.computation import (
+  get_average_MCD,
+  get_MC_X_ik,
+  get_MCD_k,
+  get_w_n_m,
+  get_X_km,
+  get_X_kn,
+)
 from mel_cepstral_distance.helper import get_hz_points
 
 

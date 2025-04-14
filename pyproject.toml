@@ -1,15 +1,12 @@
 [project]
 name = "mel-cepstral-distance"
 version = "0.0.3"
-description = "Python library to compute the Mel-Cepstral Distance (also called Mel-Cepstral Distortion) of two audio signals based on Mel-Cepstral Distance Measure for Objective Speech Quality Assessment by Kubichek (1993)."
+description = "Python library to compute the Mel-Cepstral Distance (also called Mel-Cepstral Distortion, MCD) of two audio signals based on Mel-Cepstral Distance Measure for Objective Speech Quality Assessment by Kubichek (1993)."
 readme = "README.md"
 requires-python = ">=3.8, <3.14"
-license = { text = "MIT" }
-authors = [
-  { name = "Jasmin Sternkopf", email = "jasmin.sternkopf@mathematik.tu-chemnitz.de" },
-  { name = "Stefan Taubert", email = "pypi@stefantaubert.com" },
-]
-maintainers = [{ name = "Stefan Taubert", email = "pypi@stefantaubert.com" }]
+license = { file = "LICENSE" }
+authors = [{ name = "Jasmin Sternkopf" }, { name = "Stefan Taubert" }]
+maintainers = [{ name = "Stefan Taubert" }]
 keywords = [
   "TTS",
   "Text-to-speech",
@@ -46,11 +43,10 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "License :: OSI Approved :: MIT License",
 ]
-dependencies = [
-  "numpy>=1.22.4",
-  "scipy>=1.8.0",
-  "fastdtw>=0.3.4",
-]
+dependencies = ["numpy>=1.22.4", "scipy>=1.8.0", "fastdtw>=0.3.4"]
+
+[project.optional-dependencies]
+dev = ["pytest", "coverage", "tox", "ruff", "mypy", "rope"]
 
 [project.urls]
 Homepage = "https://github.com/jasminsternkopf/mel_cepstral_distance"
@@ -87,16 +83,28 @@ log_cli = true
 log_level = "DEBUG"
 testpaths = ["src/mel_cepstral_distance_tests"]
 
-[tool.autopep8]
-indent-size = 2
-ignore = ["E121"]
-max_line_length = 100
+[tool.ruff]
+line-length = 88
+indent-width = 2
+src = ["src/mel_cepstral_distance"]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
 
-[tool.isort]
-line_length = 100
-indent = 2
-known_first_party = ["mel_cepstral_distance", "mel_cepstral_distance_cli"]
-known_third_party = ["librosa", "numpy", "scipy", "fastdtw"]
+[tool.ruff.format]
+indent-style = "space"
+
 
 [tool.tox]
 legacy_tox_ini = """

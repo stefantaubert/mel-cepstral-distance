@@ -1,3 +1,9 @@
+.venv*/
+mel_cepstral_distance_old/
+mel_cepstral_distance_cli/
+mel_cepstral_distance_analysis/
+mel_cepstral_distance_analysis_tests/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

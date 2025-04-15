@@ -139,7 +139,7 @@ Where:
 | [10]       | 16kHz         | ?                     | ?                    | ?            | ?               | ?   | ?             | ?             | 1   | 16* | yes*  | yes | 1*                            | 8.67         | 19.41       | none         | TTS     |
 | [11]       | 16kHz*        | 64ms* (at 16kHz)/1024 | 16ms* (at 16kHz)/256 | 64ms*/1024*  | Hann*           | 80  | 0Hz           | 8kHz          | 1   | 60  | yes*  | no  | $\frac{10 \sqrt{2}}{\ln(10)}$ | 5.32dB       | 6.78dB      | [12]         | TTS     |
 
-*Parameters are not explicitly stated, but were estimated from the information in the literature
+*Parameters are not explicitly stated, but were estimated from the information in the literature.
   
 **Literature:**
 

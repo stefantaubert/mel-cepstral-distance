@@ -17,5 +17,5 @@ authors:
 version: 0.0.4
 date-released: 2025-04-14
 license: MIT
-url: https://github.com/jasminsternkopf/mel_cepstral_distance
+url: https://github.com/stefantaubert/mel-cepstral-distance
 doi: 10.5281/zenodo.15213012

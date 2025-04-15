@@ -2,14 +2,13 @@
 
 If you notice an error, please don't hesitate to open an issue.
 
-## Development setup
+## Development setup (Ubuntu)
 
 ```sh
 # update
 sudo apt update
 # install Python for ensuring that tests can be run
 sudo apt install python3-pip \
-  python3.7 python3.7-dev python3.7-distutils python3.7-venv \
   python3.8 python3.8-dev python3.8-distutils python3.8-venv \
   python3.9 python3.9-dev python3.9-distutils python3.9-venv \
   python3.10 python3.10-dev python3.10-distutils python3.10-venv \
@@ -19,7 +18,7 @@ sudo apt install python3-pip \
 # install pipenv for creation of virtual environments
 
 # check out repo
-git clone https://github.com/jasminsternkopf/mel_cepstral_distance.git
+git clone https://github.com/stefantaubert/mel-cepstral-distance.git
 cd mel_cepstral_distance
 # create virtual environment
 python3.13 -m venv .venv-py13

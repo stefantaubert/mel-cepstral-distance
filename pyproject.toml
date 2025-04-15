@@ -54,11 +54,11 @@ dependencies = ["numpy>=1.22.4", "scipy>=1.8.0", "fastdtw>=0.3.4"]
 dev = ["pytest", "pytest-cov", "pytest-xdist", "tox", "ruff", "mypy", "rope", "build", "twine"]
 
 [project.urls]
-Homepage = "https://github.com/jasminsternkopf/mel_cepstral_distance"
-Issues = "https://github.com/jasminsternkopf/mel_cepstral_distance/issues"
+Homepage = "https://github.com/stefantaubert/mel-cepstral-distance"
+Issues = "https://github.com/stefantaubert/mel-cepstral-distance/issues"
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true

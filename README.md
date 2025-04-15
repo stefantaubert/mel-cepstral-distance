@@ -2,8 +2,8 @@
 
 [![PyPI](https://img.shields.io/pypi/v/mel-cepstral-distance.svg)](https://pypi.python.org/pypi/mel-cepstral-distance)
 [![PyPI](https://img.shields.io/pypi/pyversions/mel-cepstral-distance.svg)](https://pypi.python.org/pypi/mel-cepstral-distance)
-[![MIT](https://img.shields.io/github/license/jasminsternkopf/mel_cepstral_distance.svg)](https://github.com/jasminsternkopf/mel_cepstral_distance/blob/main/LICENSE)
-[![PyPI](https://img.shields.io/github/commits-since/jasminsternkopf/mel_cepstral_distance/latest/main.svg)](https://github.com/jasminsternkopf/mel_cepstral_distance/compare/v0.0.4...main)
+[![MIT](https://img.shields.io/github/license/stefantaubert/mel-cepstral-distance.svg)](https://github.com/stefantaubert/mel-cepstral-distance/blob/main/LICENSE)
+[![PyPI](https://img.shields.io/github/commits-since/stefantaubert/mel-cepstral-distance/latest/main.svg)](https://github.com/stefantaubert/mel-cepstral-distance/compare/v0.0.4...main)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/mel-cepstral-distance.svg?label=PyPI%20downloads)](https://pypi.org/project/mel-cepstral-distance)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15213012.svg)](https://doi.org/10.5281/zenodo.15213012)
 

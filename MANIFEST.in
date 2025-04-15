@@ -1,5 +1,6 @@
 graft examples/
 graft src/mel_cepstral_distance_tests/
+
 include pyproject.toml
 include LICENSE
 include CHANGELOG.md
@@ -8,5 +9,11 @@ include CODE_OF_CONDUCT.md
 include CONTRIBUTING.md
 include CITATION.cff
 
-global-exclude *.py[cod]
-prune **/__pycache__
+global-exclude \
+  *~ \
+  *.py[cod] \
+  *.so \
+  .DS_Store
+
+prune .*/
+prune **/__pycache__/

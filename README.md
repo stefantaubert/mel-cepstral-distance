@@ -1,5 +1,7 @@
 # mel-cepstral-distance
 
+[![CI](https://github.com/stefantaubert/mel-cepstral-distance/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/stefantaubert/mel-cepstral-distance/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/github/stefantaubert/mel-cepstral-distance/branch/main/graph/badge.svg?token=DZ8LB2Q5I0)](https://codecov.io/github/stefantaubert/mel-cepstral-distance)
 [![PyPI](https://img.shields.io/pypi/v/mel-cepstral-distance.svg)](https://pypi.python.org/pypi/mel-cepstral-distance)
 [![PyPI](https://img.shields.io/pypi/pyversions/mel-cepstral-distance.svg)](https://pypi.python.org/pypi/mel-cepstral-distance)
 [![MIT](https://img.shields.io/github/license/stefantaubert/mel-cepstral-distance.svg)](https://github.com/stefantaubert/mel-cepstral-distance/blob/main/LICENSE)

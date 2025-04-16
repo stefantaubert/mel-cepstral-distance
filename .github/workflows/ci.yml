@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+    
+  pull_request:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+        
+      - name: Install dependencies
+        run: |
+          python -m pip install uv
+          python -m uv pip install --system .[dev]
+
+      - name: Run linters
+        run: ruff check
+
+      - name: Type checking
+        run: mypy
+
+      - name: Run tests
+        run: pytest -n auto
+        
+      - name: Test build
+        run: |
+          python -m build -o dist/
+          python -m twine check dist/*
+        
+  install-via-sdist-and-run-tests:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+          
+      - name: Install dependencies
+        run: python -m pip install build pytest pytest-xdist
+
+      - name: Run build
+        run: python -m build -o dist/
+
+      - name: Install from sdist (.tar.gz)
+        shell: bash
+        run: |
+          FILE=$(echo dist/*.tar.gz)
+          python -m pip install "$FILE"
+
+      - name: Smoke test (import)
+        run: python -c "import mel_cepstral_distance"
+
+      - name: Run tests
+        run: pytest -n auto
+
+  install-via-wheel:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+          
+      - name: Install dependencies
+        run: python -m pip install build
+
+      - name: Run build
+        run: python -m build -o dist/
+
+      - name: Install from wheel (.whl)
+        shell: bash
+        run: |
+          FILE=$(echo dist/*.whl)
+          python -m pip install "$FILE"
+
+      - name: Smoke test (import)
+        run: python -c "import mel_cepstral_distance"

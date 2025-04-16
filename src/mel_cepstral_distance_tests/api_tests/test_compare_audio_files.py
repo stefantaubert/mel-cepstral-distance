@@ -94,10 +94,16 @@ def test_uint8_8bitPCM() -> None:
 
 def test_float32_32bitFloat() -> None:
   with NamedTemporaryFile(
-    suffix=".wav", delete=True, prefix="test_compare_audio_files"
+    suffix=".wav", delete=False, prefix="test_compare_audio_files"
   ) as file_a_tmp:
     audio_a_tmp_path = Path(file_a_tmp.name)
 
+  with NamedTemporaryFile(
+    suffix=".wav", delete=False, prefix="test_compare_audio_files"
+  ) as file_b_tmp:
+    audio_b_tmp_path = Path(file_b_tmp.name)
+
+  try:
     sr_a, audio_a = wavfile.read(AUDIO_A)
     assert sr_a == 22050
     assert audio_a.dtype == np.int16
@@ -106,66 +112,73 @@ def test_float32_32bitFloat() -> None:
     new_audio = norm_audio.astype(np.float32)
     wavfile.write(audio_a_tmp_path, 22050, new_audio)
 
-    with NamedTemporaryFile(
-      suffix=".wav", delete=True, prefix="test_compare_audio_files"
-    ) as file_b_tmp:
-      audio_b_tmp_path = Path(file_b_tmp.name)
+    sr_b, audio_b = wavfile.read(AUDIO_B)
+    assert sr_b == 22050
+    assert audio_b.dtype == np.int16
 
-      sr_b, audio_b = wavfile.read(AUDIO_B)
-      assert sr_b == 22050
-      assert audio_b.dtype == np.int16
+    norm_audio = audio_b / 32768.0
+    new_audio = norm_audio.astype(np.float32)
+    wavfile.write(audio_b_tmp_path, 22050, new_audio)
 
-      norm_audio = audio_b / 32768.0
-      new_audio = norm_audio.astype(np.float32)
-      wavfile.write(audio_b_tmp_path, 22050, new_audio)
+    test_cases = [
+      (AUDIO_A, AUDIO_B),  # 16 bit vs 32 bit
+      (AUDIO_A, audio_b_tmp_path),  # 16 bit vs 32 bit
+      (audio_a_tmp_path, AUDIO_B),  # 16 bit vs 32 bit
+      (audio_a_tmp_path, audio_b_tmp_path),  # 16 bit vs 32 bit
+    ]
 
-      test_cases = [
-        (AUDIO_A, AUDIO_B),  # 16 bit vs 32 bit
-        (AUDIO_A, audio_b_tmp_path),  # 16 bit vs 32 bit
-        (audio_a_tmp_path, AUDIO_B),  # 16 bit vs 32 bit
-        (audio_a_tmp_path, audio_b_tmp_path),  # 16 bit vs 32 bit
-      ]
+    test_results = []
 
-      test_results = []
+    for a, b in test_cases:
+      mcd, pen = compare_audio_files(
+        a,
+        b,
+        sample_rate=22050,
+        align_target="mel",
+        aligning="dtw",
+        remove_silence="no",
+        norm_audio=False,
+        M=20,
+        s=1,
+        D=16,
+        fmin=0,
+        fmax=8000,
+        n_fft=32,
+        win_len=32,
+        hop_len=16,
+        window="hanning",
+        dtw_radius=1,
+      )
+      test_results.append([mcd, pen])
 
-      for a, b in test_cases:
-        mcd, pen = compare_audio_files(
-          a,
-          b,
-          sample_rate=22050,
-          align_target="mel",
-          aligning="dtw",
-          remove_silence="no",
-          norm_audio=False,
-          M=20,
-          s=1,
-          D=16,
-          fmin=0,
-          fmax=8000,
-          n_fft=32,
-          win_len=32,
-          hop_len=16,
-          window="hanning",
-          dtw_radius=1,
-        )
-        test_results.append([mcd, pen])
+    assert_results = [
+      [7.64104558175767, 0.14414414414414423],
+      [8.386707066033125, 0.044303797468354444],
+      [8.402813719266112, 0.044303797468354444],
+      [7.641045506653429, 0.14414414414414423],
+    ]
 
-      assert_results = [
-        [7.64104558175767, 0.14414414414414423],
-        [8.386707066033125, 0.044303797468354444],
-        [8.402813719266112, 0.044303797468354444],
-        [7.641045506653429, 0.14414414414414423],
-      ]
+    np.testing.assert_almost_equal(test_results, assert_results)
 
-      np.testing.assert_almost_equal(test_results, assert_results)
+  finally:
+    if audio_a_tmp_path.exists():
+      os.remove(audio_a_tmp_path)
+    if audio_b_tmp_path.exists():
+      os.remove(audio_b_tmp_path)
 
 
 def test_int32_32bitPCM() -> None:
   with NamedTemporaryFile(
-    suffix=".wav", delete=True, prefix="test_compare_audio_files"
+    suffix=".wav", delete=False, prefix="test_compare_audio_files"
   ) as file_a_tmp:
     audio_a_tmp_path = Path(file_a_tmp.name)
 
+  with NamedTemporaryFile(
+    suffix=".wav", delete=False, prefix="test_compare_audio_files"
+  ) as file_b_tmp:
+    audio_b_tmp_path = Path(file_b_tmp.name)
+
+  try:
     sr_a, audio_a = wavfile.read(AUDIO_A)
     assert sr_a == 22050
     assert audio_a.dtype == np.int16
@@ -174,58 +187,59 @@ def test_int32_32bitPCM() -> None:
     new_audio = (norm_audio * 2147483647).astype(np.int32)
     wavfile.write(audio_a_tmp_path, 22050, new_audio)
 
-    with NamedTemporaryFile(
-      suffix=".wav", delete=True, prefix="test_compare_audio_files"
-    ) as file_b_tmp:
-      audio_b_tmp_path = Path(file_b_tmp.name)
+    sr_b, audio_b = wavfile.read(AUDIO_B)
+    assert sr_b == 22050
+    assert audio_b.dtype == np.int16
 
-      sr_b, audio_b = wavfile.read(AUDIO_B)
-      assert sr_b == 22050
-      assert audio_b.dtype == np.int16
+    norm_audio = audio_b / 32768.0
+    new_audio = norm_audio.astype(np.float32)
+    wavfile.write(audio_b_tmp_path, 22050, new_audio)
 
-      norm_audio = audio_b / 32768.0
-      new_audio = norm_audio.astype(np.float32)
-      wavfile.write(audio_b_tmp_path, 22050, new_audio)
+    test_cases = [
+      (AUDIO_A, AUDIO_B),  # 16 bit vs 32 bit
+      (AUDIO_A, audio_b_tmp_path),  # 16 bit vs 32 bit
+      (audio_a_tmp_path, AUDIO_B),  # 16 bit vs 32 bit
+      (audio_a_tmp_path, audio_b_tmp_path),  # 16 bit vs 32 bit
+    ]
 
-      test_cases = [
-        (AUDIO_A, AUDIO_B),  # 16 bit vs 32 bit
-        (AUDIO_A, audio_b_tmp_path),  # 16 bit vs 32 bit
-        (audio_a_tmp_path, AUDIO_B),  # 16 bit vs 32 bit
-        (audio_a_tmp_path, audio_b_tmp_path),  # 16 bit vs 32 bit
-      ]
+    test_results = []
 
-      test_results = []
+    for a, b in test_cases:
+      mcd, pen = compare_audio_files(
+        a,
+        b,
+        sample_rate=22050,
+        align_target="mel",
+        aligning="dtw",
+        remove_silence="no",
+        norm_audio=False,
+        M=20,
+        s=1,
+        D=16,
+        fmin=0,
+        fmax=8000,
+        n_fft=32,
+        win_len=32,
+        hop_len=16,
+        window="hanning",
+        dtw_radius=1,
+      )
+      test_results.append([mcd, pen])
 
-      for a, b in test_cases:
-        mcd, pen = compare_audio_files(
-          a,
-          b,
-          sample_rate=22050,
-          align_target="mel",
-          aligning="dtw",
-          remove_silence="no",
-          norm_audio=False,
-          M=20,
-          s=1,
-          D=16,
-          fmin=0,
-          fmax=8000,
-          n_fft=32,
-          win_len=32,
-          hop_len=16,
-          window="hanning",
-          dtw_radius=1,
-        )
-        test_results.append([mcd, pen])
+    assert_results = [
+      [7.64104558175767, 0.14414414414414423],
+      [8.386707066033125, 0.044303797468354444],
+      [8.386707040162092, 0.044303797468354444],
+      [8.386707040119276, 0.044303797468354444],
+    ]
 
-      assert_results = [
-        [7.64104558175767, 0.14414414414414423],
-        [8.386707066033125, 0.044303797468354444],
-        [8.386707040162092, 0.044303797468354444],
-        [8.386707040119276, 0.044303797468354444],
-      ]
+    np.testing.assert_almost_equal(test_results, assert_results)
 
-      np.testing.assert_almost_equal(test_results, assert_results)
+  finally:
+    if audio_a_tmp_path.exists():
+      os.remove(audio_a_tmp_path)
+    if audio_b_tmp_path.exists():
+      os.remove(audio_b_tmp_path)
 
 
 def test_diff_sr_resamples_to_smaller_sr() -> None:
@@ -235,60 +249,68 @@ def test_diff_sr_resamples_to_smaller_sr() -> None:
 
   # create tmp file with different sample rate
   with NamedTemporaryFile(
-    suffix=".wav", delete=True, prefix="test_compare_audio_files"
+    suffix=".wav", delete=False, prefix="test_compare_audio_files"
   ) as file_a_tmp:
     audio_a_tmp_path = Path(file_a_tmp.name)
 
+  with NamedTemporaryFile(
+    suffix=".wav", delete=False, prefix="test_compare_audio_files"
+  ) as file_b_tmp:
+    audio_b_tmp_path = Path(file_b_tmp.name)
+
+  try:
     sr_a, audio_a = wavfile.read(AUDIO_A)
     assert sr_a == 22050
 
     resampled_audio = resample_if_necessary(audio_a, sr_a, new_sr)
     wavfile.write(audio_a_tmp_path, new_sr, resampled_audio)
 
-    with NamedTemporaryFile(
-      suffix=".wav", delete=True, prefix="test_compare_audio_files"
-    ) as file_b_tmp:
-      audio_b_tmp_path = Path(file_b_tmp.name)
+    sr_b, audio_b = wavfile.read(AUDIO_B)
+    assert sr_b == 22050
 
-      sr_b, audio_b = wavfile.read(AUDIO_B)
-      assert sr_b == 22050
+    resampled_audio = resample_if_necessary(audio_b, sr_b, new_sr)
+    wavfile.write(audio_b_tmp_path, new_sr, resampled_audio)
 
-      resampled_audio = resample_if_necessary(audio_b, sr_b, new_sr)
-      wavfile.write(audio_b_tmp_path, new_sr, resampled_audio)
-      for a, b, should_be_assert_result in [
-        (AUDIO_A, audio_b_tmp_path, True),  # 16000 Hz vs 22050 Hz
-        (audio_a_tmp_path, AUDIO_B, True),  # 22050 Hz vs 16000 Hz
-        (audio_a_tmp_path, audio_b_tmp_path, True),  # 16000 Hz vs 16000 Hz
-        (AUDIO_A, AUDIO_B, False),  # 22050 Hz vs 22050 Hz
-      ]:
-        # set default params
-        mcd, pen = compare_audio_files(
-          a,
-          b,
-          sample_rate=None,
-          align_target="mel",
-          aligning="dtw",
-          remove_silence="no",
-          norm_audio=True,
-          M=20,
-          s=1,
-          D=16,
-          fmin=0,
-          fmax=new_sr // 2,
-          n_fft=32,
-          win_len=32,
-          hop_len=16,
-          window="hanning",
-          dtw_radius=1,
-        )
+    for a, b, should_be_assert_result in [
+      (AUDIO_A, audio_b_tmp_path, True),  # 16000 Hz vs 22050 Hz
+      (audio_a_tmp_path, AUDIO_B, True),  # 22050 Hz vs 16000 Hz
+      (audio_a_tmp_path, audio_b_tmp_path, True),  # 16000 Hz vs 16000 Hz
+      (AUDIO_A, AUDIO_B, False),  # 22050 Hz vs 22050 Hz
+    ]:
+      # set default params
+      mcd, pen = compare_audio_files(
+        a,
+        b,
+        sample_rate=None,
+        align_target="mel",
+        aligning="dtw",
+        remove_silence="no",
+        norm_audio=True,
+        M=20,
+        s=1,
+        D=16,
+        fmin=0,
+        fmax=new_sr // 2,
+        n_fft=32,
+        win_len=32,
+        hop_len=16,
+        window="hanning",
+        dtw_radius=1,
+      )
 
-        if should_be_assert_result:
+      if should_be_assert_result:
+        np.testing.assert_almost_equal(mcd, assert_mcd)
+        np.testing.assert_almost_equal(pen, assert_pen)
+      else:
+        with np.testing.assert_raises(AssertionError):
           np.testing.assert_almost_equal(mcd, assert_mcd)
           np.testing.assert_almost_equal(pen, assert_pen)
-        else:
-          with np.testing.assert_raises(AssertionError):
-            np.testing.assert_almost_equal(mcd, assert_mcd)
-            np.testing.assert_almost_equal(pen, assert_pen)
+
+  finally:
+    if audio_a_tmp_path.exists():
+      os.remove(audio_a_tmp_path)
+    if audio_b_tmp_path.exists():
+      os.remove(audio_b_tmp_path)
 
 
 def test_aligning_with_pad_returns_same_for_spec_mel_mfcc() -> None:
@@ -1018,9 +1040,11 @@ def test_s_bigger_than_D_raises_error() -> None:
 def test_empty_audio_returns_nan_nan() -> None:
   # create empty audio in tmp dir
   with NamedTemporaryFile(
-    suffix=".wav", delete=True, prefix="test_compare_audio_files"
+    suffix=".wav", delete=False, prefix="test_compare_audio_files"
   ) as f:
     empty_audio_path = Path(f.name)
+
+  try:
     data = np.array([], dtype=np.int16)
     wavfile.write(empty_audio_path, 22050, data)
 
@@ -1089,6 +1113,10 @@ def test_empty_audio_returns_nan_nan() -> None:
     )
     assert np.isnan(mcd)
     assert np.isnan(pen)
+
+  finally:
+    if empty_audio_path.exists():
+      os.remove(empty_audio_path)
 
 
 def create_other_outputs() -> None:

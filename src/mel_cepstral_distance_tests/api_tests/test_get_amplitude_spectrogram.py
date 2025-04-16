@@ -1,3 +1,4 @@
+import os
 import pickle
 from logging import getLogger
 from pathlib import Path
@@ -18,10 +19,11 @@ AUDIO_A = TEST_DIR / "A.wav"
 
 def test_uint8_8bitPCM() -> None:
   with NamedTemporaryFile(
-    suffix=".wav", delete=True, prefix="test_compare_audio_files"
+    suffix=".wav", delete=False, prefix="test_compare_audio_files"
   ) as file_a_tmp:
     audio_a_tmp_path = Path(file_a_tmp.name)
 
+  try:
     sr_a, audio_a = wavfile.read(AUDIO_A)
     assert sr_a == 22050
     assert audio_a.dtype == np.int16
@@ -42,6 +44,10 @@ def test_uint8_8bitPCM() -> None:
 
     assert res.shape == (302, 353)
 
+  finally:
+    if audio_a_tmp_path.exists():
+      os.remove(audio_a_tmp_path)
+
 
 def test_int16_16bitPCM() -> None:
   res = get_amplitude_spectrogram(
@@ -59,10 +65,11 @@ def test_int16_16bitPCM() -> None:
 
 def test_float32_32bitFloat() -> None:
   with NamedTemporaryFile(
-    suffix=".wav", delete=True, prefix="test_compare_audio_files"
+    suffix=".wav", delete=False, prefix="test_compare_audio_files"
   ) as file_a_tmp:
     audio_a_tmp_path = Path(file_a_tmp.name)
 
+  try:
     sr_a, audio_a = wavfile.read(AUDIO_A)
     assert sr_a == 22050
     assert audio_a.dtype == np.int16
@@ -83,13 +90,18 @@ def test_float32_32bitFloat() -> None:
 
     assert res.shape == (302, 353)
 
+  finally:
+    if audio_a_tmp_path.exists():
+      os.remove(audio_a_tmp_path)
+
 
 def test_float64_64bitFloat() -> None:
   with NamedTemporaryFile(
-    suffix=".wav", delete=True, prefix="test_compare_audio_files"
+    suffix=".wav", delete=False, prefix="test_compare_audio_files"
   ) as file_a_tmp:
     audio_a_tmp_path = Path(file_a_tmp.name)
 
+  try:
     sr_a, audio_a = wavfile.read(AUDIO_A)
     assert sr_a == 22050
     assert audio_a.dtype == np.int16
@@ -109,6 +121,10 @@ def test_float64_64bitFloat() -> None:
     )
 
     assert res.shape == (302, 353)
+
+  finally:
+    if audio_a_tmp_path.exists():
+      os.remove(audio_a_tmp_path)
 
 
 def test_sr_resampling() -> None:
@@ -199,9 +215,11 @@ def test_removing_silence_from_sig_too_hard_returns_empty() -> None:
 
 def test_empty_signal_returns_empty() -> None:
   with NamedTemporaryFile(
-    suffix=".wav", delete=True, prefix="test_compare_audio_files"
+    suffix=".wav", delete=False, prefix="test_compare_audio_files"
   ) as file_a_tmp:
     audio_a_tmp_path = Path(file_a_tmp.name)
+
+  try:
     audio_a = np.empty(0, dtype=np.int16)
     wavfile.write(audio_a_tmp_path, 22050, audio_a)
 
@@ -216,6 +234,10 @@ def test_empty_signal_returns_empty() -> None:
     )
 
     assert res.shape == (0, 353)
+
+  finally:
+    if audio_a_tmp_path.exists():
+      os.remove(audio_a_tmp_path)
 
 
 def test_invalid_sig_sil_thres_raises_error() -> None:

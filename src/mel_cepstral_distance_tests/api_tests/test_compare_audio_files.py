@@ -1,3 +1,4 @@
+import os
 import pickle
 from logging import getLogger
 from pathlib import Path
@@ -18,10 +19,16 @@ AUDIO_B = TEST_DIR / "B.wav"
 
 def test_uint8_8bitPCM() -> None:
   with NamedTemporaryFile(
-    suffix=".wav", delete=True, prefix="test_compare_audio_files"
+    suffix=".wav", delete=False, prefix="test_compare_audio_files"
   ) as file_a_tmp:
     audio_a_tmp_path = Path(file_a_tmp.name)
 
+  with NamedTemporaryFile(
+    suffix=".wav", delete=False, prefix="test_compare_audio_files"
+  ) as file_b_tmp:
+    audio_b_tmp_path = Path(file_b_tmp.name)
+
+  try:
     sr_a, audio_a = wavfile.read(AUDIO_A)
     assert sr_a == 22050
     assert audio_a.dtype == np.int16
@@ -30,58 +37,59 @@ def test_uint8_8bitPCM() -> None:
     new_audio = ((norm_audio + 1) * 127.5).astype(np.uint8)
     wavfile.write(audio_a_tmp_path, 22050, new_audio)
 
-    with NamedTemporaryFile(
-      suffix=".wav", delete=True, prefix="test_compare_audio_files"
-    ) as file_b_tmp:
-      audio_b_tmp_path = Path(file_b_tmp.name)
+    sr_b, audio_b = wavfile.read(AUDIO_B)
+    assert sr_b == 22050
+    assert audio_b.dtype == np.int16
 
-      sr_b, audio_b = wavfile.read(AUDIO_B)
-      assert sr_b == 22050
-      assert audio_b.dtype == np.int16
+    norm_audio = audio_b / 32768.0
+    new_audio = ((norm_audio + 1) * 127.5).astype(np.uint8)
+    wavfile.write(audio_b_tmp_path, 22050, new_audio)
 
-      norm_audio = audio_b / 32768.0
-      new_audio = ((norm_audio + 1) * 127.5).astype(np.uint8)
-      wavfile.write(audio_b_tmp_path, 22050, new_audio)
+    test_cases = [
+      (AUDIO_A, AUDIO_B),  # 16 bit vs 8 bit
+      (AUDIO_A, audio_b_tmp_path),  # 16 bit vs 8 bit
+      (audio_a_tmp_path, AUDIO_B),  # 16 bit vs 8 bit
+      (audio_a_tmp_path, audio_b_tmp_path),  # 16 bit vs 8 bit
+    ]
 
-      test_cases = [
-        (AUDIO_A, AUDIO_B),  # 16 bit vs 8 bit
-        (AUDIO_A, audio_b_tmp_path),  # 16 bit vs 8 bit
-        (audio_a_tmp_path, AUDIO_B),  # 16 bit vs 8 bit
-        (audio_a_tmp_path, audio_b_tmp_path),  # 16 bit vs 8 bit
-      ]
+    test_results = []
 
-      test_results = []
+    for a, b in test_cases:
+      mcd, pen = compare_audio_files(
+        a,
+        b,
+        sample_rate=22050,
+        align_target="mel",
+        aligning="dtw",
+        remove_silence="no",
+        norm_audio=False,
+        M=20,
+        s=1,
+        D=16,
+        fmin=0,
+        fmax=8000,
+        n_fft=32,
+        win_len=32,
+        hop_len=16,
+        window="hanning",
+        dtw_radius=1,
+      )
+      test_results.append([mcd, pen])
 
-      for a, b in test_cases:
-        mcd, pen = compare_audio_files(
-          a,
-          b,
-          sample_rate=22050,
-          align_target="mel",
-          aligning="dtw",
-          remove_silence="no",
-          norm_audio=False,
-          M=20,
-          s=1,
-          D=16,
-          fmin=0,
-          fmax=8000,
-          n_fft=32,
-          win_len=32,
-          hop_len=16,
-          window="hanning",
-          dtw_radius=1,
-        )
-        test_results.append([mcd, pen])
+    assert_results = [
+      [7.64104558175767, 0.14414414414414423],
+      [15.955726033561426, 0.16617210682492578],
+      [19.39442751788282, 0.06269592476489039],
+      [3.8681248602509037, 0.33870967741935476],
+    ]
 
-      assert_results = [
-        [7.64104558175767, 0.14414414414414423],
-        [15.955726033561426, 0.16617210682492578],
-        [19.39442751788282, 0.06269592476489039],
-        [3.8681248602509037, 0.33870967741935476],
-      ]
+    np.testing.assert_almost_equal(test_results, assert_results)
 
-      np.testing.assert_almost_equal(test_results, assert_results)
+  finally:
+    if audio_a_tmp_path.exists():
+      os.remove(audio_a_tmp_path)
+    if audio_b_tmp_path.exists():
+      os.remove(audio_b_tmp_path)
 
 
 def test_float32_32bitFloat() -> None:

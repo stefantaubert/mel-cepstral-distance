@@ -33,11 +33,11 @@ from mel_cepstral_distance import compare_audio_files
 
 mcd, penalty = compare_audio_files(
   'examples/GT.wav',
-  'examples/WaveGlow.wav',
+  'examples/Tacotron-2.wav',
 )
 
 print(f'MCD: {mcd:.2f}, Penalty: {penalty:.4f}')
-# MCD: 4.03, Penalty: 0.0197
+# MCD: 7.45, Penalty: 0.1087
 ```
 
 ## Calculation

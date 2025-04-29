@@ -131,8 +131,12 @@ def test_same_spec_returns_zero() -> None:
 
 
 def test_invalid_radius_raises_error() -> None:
-  with pytest.raises(ValueError):
-    compare_mel_spectrograms(get_X_kn_A(), get_X_kn_B(), aligning="dtw", dtw_radius=0)
+  with pytest.raises(
+    ValueError, match="dtw_radius must be None or greater than or equal to 1"
+  ):
+    compare_mel_spectrograms(
+      get_X_kn_A(), get_X_kn_B(), aligning="dtw", align_target="mel", dtw_radius=0
+    )
 
 
 def test_removing_silence_from_mel_too_hard_returns_nan_nan() -> None:

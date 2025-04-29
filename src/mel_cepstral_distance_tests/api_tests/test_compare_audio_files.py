@@ -559,7 +559,9 @@ def test_invalid_remove_silence_raises_error() -> None:
 
 
 def test_invalid_radius_raises_error() -> None:
-  with pytest.raises(ValueError):
+  with pytest.raises(
+    ValueError, match="dtw_radius must be None or greater than or equal to 1"
+  ):
     compare_audio_files(AUDIO_A, AUDIO_B, aligning="dtw", dtw_radius=0)
 
 

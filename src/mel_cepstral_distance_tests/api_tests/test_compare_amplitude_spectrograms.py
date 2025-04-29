@@ -376,7 +376,9 @@ def test_no_freq_bins_raises_error() -> None:
 
 
 def test_invalid_radius_raises_error() -> None:
-  with pytest.raises(ValueError):
+  with pytest.raises(
+    ValueError, match="dtw_radius must be None or greater than or equal to 1"
+  ):
     compare_amplitude_spectrograms(
       get_X_km_A(),
       get_X_km_B(),
@@ -384,6 +386,7 @@ def test_invalid_radius_raises_error() -> None:
       samples_to_ms(512, 22050),
       dtw_radius=0,
       aligning="dtw",
+      align_target="spec",
     )
 
 

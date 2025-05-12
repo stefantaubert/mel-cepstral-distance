@@ -215,7 +215,8 @@ def get_mel_spectrogram(
     Maximum frequency (in Hz) for mel-band calculation. If not set, defaults to
     sample_rate / 2. Must satisfy 0 < fmax <= sample_rate / 2.
   remove_silence : bool, optional, default=False
-    If True, removes silence from the spectrogram based on `silence_threshold`.
+    If True, removes silence from the amplitude spectrogram
+    based on `silence_threshold`.
   silence_threshold : float, optional
     Threshold used to detect silence when `remove_silence` is True.
 

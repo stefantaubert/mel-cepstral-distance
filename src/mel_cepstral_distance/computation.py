@@ -103,8 +103,8 @@ def get_X_kn(X_km: npt.NDArray[np.complex128], w_n_m: npt.NDArray) -> npt.NDArra
 
 
 def get_MC_X_ik(X_kn: npt.NDArray, M: int) -> npt.NDArray:
-  """Calculates the mel cepstrum coefficients of the Mel spectrogram
-  returns mel cepstrum with shape (M, #frames)
+  """Calculates the Mel cepstrum coefficients of the Mel spectrogram
+  returns Mel cepstrum with shape (M, #frames)
   """
   # K: total frame count
   # M: number of cepstral coefficients

@@ -5,8 +5,8 @@ from mel_cepstral_distance.computation import get_MC_X_ik
 
 def get_MC_X_ik_from_paper(X_kn: np.ndarray, M: int) -> np.ndarray:
   """ "
-  Calculates the mel cepstrum coefficients of the Mel spectrogram
-  returns mel cepstrum with shape (M, #frames)
+  Calculates the Mel cepstrum coefficients of the Mel spectrogram
+  returns Mel cepstrum with shape (M, #frames)
   """
   # K: total frame count
   # M: number of cepstral coefficients

@@ -196,7 +196,7 @@ def get_mel_spectrogram(
   silence_threshold: Optional[float] = None,
 ) -> npt.NDArray:
   """
-  Converts an amplitude spectrogram to a mel-spectrogram using mel filterbanks.
+  Converts an amplitude spectrogram to a Mel spectrogram using mel filterbanks.
   Optionally removes silence based on a threshold.
 
   Parameters
@@ -223,7 +223,7 @@ def get_mel_spectrogram(
   Returns
   -------
   numpy.ndarray
-    A 2D mel-spectrogram of shape (frames, mel bands). Returns an empty array if
+    A 2D Mel spectrogram of shape (frames, mel bands). Returns an empty array if
     the input spectrogram is empty or becomes empty after silence removal.
 
   Raises
@@ -316,15 +316,15 @@ def get_mfccs(
 ) -> npt.NDArray:
   """
   Computes the Mel-Frequency Cepstral Coefficients (MFCCs) from a given
-  mel-spectrogram. Optionally removes silence based on a threshold.
+  Mel spectrogram. Optionally removes silence based on a threshold.
 
   Parameters
   ----------
   mel_spec : numpy.ndarray
-    A 2D mel-spectrogram of shape (frames, mel bands). Must have at least
+    A 2D Mel spectrogram of shape (frames, mel bands). Must have at least
     one frame and one mel band.
   remove_silence : bool, optional, default=False
-    If True, removes silence from the mel-spectrogram based on the
+    If True, removes silence from the Mel spectrogram based on the
     `silence_threshold` parameter.
   silence_threshold : float, optional
     Threshold used to detect silence when `remove_silence` is True.
@@ -333,7 +333,7 @@ def get_mfccs(
   -------
   numpy.ndarray
     A 2D array of MFCCs with shape (mel bands, frames). Returns an empty
-    array if the input mel-spectrogram is empty or becomes empty after
+    array if the input Mel spectrogram is empty or becomes empty after
     silence removal.
 
   Raises
@@ -347,23 +347,23 @@ def get_mfccs(
 
   Notes
   -----
-  - The function assumes the input mel-spectrogram is precomputed and valid.
-  - Silence removal is applied by thresholding the mel-spectrogram frames
+  - The function assumes the input Mel spectrogram is precomputed and valid.
+  - Silence removal is applied by thresholding the Mel spectrogram frames
     based on their energy.
   - The resulting MFCCs are computed using the Discrete Cosine Transform (DCT)
-    on the log-mel-spectrogram.
+    on the log-Mel spectrogram.
   """
   if len(mel_spec.shape) != 2:
     raise ValueError(
-      f"mel-spectrogram must have 2 dimensions but got {len(mel_spec.shape)}"
+      f"Mel spectrogram must have 2 dimensions but got {len(mel_spec.shape)}"
     )
 
   if mel_spec.shape[1] == 0:
-    raise ValueError("mel-spectrogram must have at least 1 mel-band")
+    raise ValueError("Mel spectrogram must have at least 1 mel-band")
 
   if mel_spec.shape[0] == 0:
     logger = getLogger(__name__)
-    logger.warning("mel-spectrogram is empty")
+    logger.warning("Mel spectrogram is empty")
     empty_mfccs = np.empty((mel_spec.shape[1], 0), dtype=np.float64)
     return empty_mfccs
 
@@ -375,7 +375,7 @@ def get_mfccs(
 
     if mel_spec.shape[0] == 0:
       logger = getLogger(__name__)
-      logger.warning("after removing silence, mel-spectrogram is empty")
+      logger.warning("after removing silence, Mel spectrogram is empty")
       empty_mfccs = np.empty((mel_spec.shape[1], 0), dtype=np.float64)
       return empty_mfccs
 
@@ -408,7 +408,7 @@ def compare_audio_files(
 ) -> Tuple[float, float]:
   """
   Compares two audio signals by computing the mean Mel-Cepstral Distance (MCD) between
-  them. Internally computes amplitude and mel spectrograms, extracts MFCCs, and aligns
+  them. Internally computes amplitude and Mel spectrograms, extracts MFCCs, and aligns
   them for comparison. Silence can optionally be removed before alignment.
 
   This is the main entry point for evaluating similarity between two audio files in the
@@ -691,7 +691,7 @@ def compare_amplitude_spectrograms(
       can be removed.
   remove_silence : {'no', 'spec', 'mel', 'mfcc'}, optional, default='no'
       Stage at which silence is removed. "spec" applies thresholding to spectral frames,
-      while "mel" and "mfcc" apply thresholding to mel-spectrograms or MFCCs,
+      while "mel" and "mfcc" apply thresholding to Mel spectrograms or MFCCs,
       respectively. Silence is always removed before alignment.
   silence_threshold_A : float, optional
       Threshold used to detect silence in `amp_spec_A`, depending on the selected
@@ -787,7 +787,7 @@ def compare_amplitude_spectrograms(
   if align_target == "spec":
     if remove_silence == "mel":
       raise ValueError(
-        "cannot remove silence from mel-spectrogram "
+        "cannot remove silence from Mel spectrogram "
         "after both spectrograms were aligned"
       )
     if remove_silence == "mfcc":
@@ -887,16 +887,16 @@ def compare_mel_spectrograms(
   dtw_radius: Optional[int] = 10,
 ) -> Tuple[float, float]:
   """
-  Compares two mel-spectrograms by computing the mean Mel-Cepstral Distance (MCD)
+  Compares two Mel spectrograms by computing the mean Mel-Cepstral Distance (MCD)
   and an alignment penalty. Supports silence removal and alignment at different
   stages of the processing pipeline.
 
   Parameters
   ----------
   mel_spec_A : numpy.ndarray
-      A 2D mel-spectrogram of shape (frames, mel bands).
+      A 2D Mel spectrogram of shape (frames, mel bands).
   mel_spec_B : numpy.ndarray
-      A 2D mel-spectrogram of shape (frames, mel bands).
+      A 2D Mel spectrogram of shape (frames, mel bands).
   s : int, optional, default=1
       Starting index (inclusive) for MFCCs used in MCD calculation. Must be in [0, D).
   D : int, optional, default=16
@@ -909,7 +909,7 @@ def compare_mel_spectrograms(
       Spectral level at which alignment is applied. Determines at which stage silence
       should be removed.
   remove_silence : {'no', 'mel', 'mfcc'}, optional, default='no'
-      Stage at which silence is removed. "mel" applies thresholding to mel-spectrogram
+      Stage at which silence is removed. "mel" applies thresholding to Mel spectrogram
       frames, while "mfcc" applies thresholding to MFCCs. Silence is always removed
       before alignment.
   silence_threshold_A : float, optional
@@ -953,38 +953,38 @@ def compare_mel_spectrograms(
 
   Notes
   -----
-  - The function assumes the input mel-spectrograms are precomputed and valid.
-  - Silence removal is applied by thresholding the mel-spectrogram frames or MFCCs
+  - The function assumes the input Mel spectrograms are precomputed and valid.
+  - Silence removal is applied by thresholding the Mel spectrogram frames or MFCCs
     based on their energy.
   - Alignment is performed using either zero-padding or Dynamic Time Warping (DTW).
   - The resulting MCD is computed over the selected MFCC coefficients.
   """
   if not len(mel_spec_A.shape) == 2:
     raise ValueError(
-      f"mel-spectrogram A must have 2 dimensions but got {len(mel_spec_A.shape)}"
+      f"Mel spectrogram A must have 2 dimensions but got {len(mel_spec_A.shape)}"
     )
 
   if not len(mel_spec_B.shape) == 2:
     raise ValueError(
-      f"mel-spectrogram B must have 2 dimensions but got {len(mel_spec_B.shape)}"
+      f"Mel spectrogram B must have 2 dimensions but got {len(mel_spec_B.shape)}"
     )
 
   if len(mel_spec_A) == 0:
     logger = getLogger(__name__)
-    logger.warning("mel-spectrogram A is empty")
+    logger.warning("Mel spectrogram A is empty")
     return np.nan, np.nan
 
   if len(mel_spec_B) == 0:
     logger = getLogger(__name__)
-    logger.warning("mel-spectrogram B is empty")
+    logger.warning("Mel spectrogram B is empty")
     return np.nan, np.nan
 
   if not mel_spec_A.shape[1] == mel_spec_B.shape[1]:
-    raise ValueError("both mel-spectrograms must have the same number of mel-bands")
+    raise ValueError("both Mel spectrograms must have the same number of mel-bands")
   M = mel_spec_A.shape[1]
 
   if not M > 0:
-    raise ValueError("mel-spectrograms must have at least 1 mel-band")
+    raise ValueError("Mel spectrograms must have at least 1 mel-band")
 
   if aligning not in ["pad", "dtw"]:
     raise ValueError("aligning must be 'pad' or 'dtw'")
@@ -997,7 +997,7 @@ def compare_mel_spectrograms(
 
   if align_target == "mel" and remove_silence == "mfcc":
     raise ValueError(
-      "cannot remove silence from MFCCs after both mel-spectrograms were aligned"
+      "cannot remove silence from MFCCs after both Mel spectrograms were aligned"
     )
 
   if D > M:
@@ -1014,12 +1014,12 @@ def compare_mel_spectrograms(
 
     if mel_spec_A.shape[0] == 0:
       logger = getLogger(__name__)
-      logger.warning("after removing silence, mel-spectrogram A is empty")
+      logger.warning("after removing silence, Mel spectrogram A is empty")
       return np.nan, np.nan
 
     if mel_spec_B.shape[0] == 0:
       logger = getLogger(__name__)
-      logger.warning("after removing silence, mel-spectrogram B is empty")
+      logger.warning("after removing silence, Mel spectrogram B is empty")
       return np.nan, np.nan
 
     remove_silence = "no"

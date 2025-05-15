@@ -11,9 +11,9 @@
 
 A Python library for computing the Mel-Cepstral Distance (also known as Mel-Cepstral Distortion, MCD) between two inputs. This implementation is based on the method proposed by Robert F. Kubichek in [*Mel-Cepstral Distance Measure for Objective Speech Quality Assessment*](https://ieeexplore.ieee.org/document/407206).
 
-- Compute MCD between two inputs: audio files, amplitude spectrograms, mel spectrograms, or MFCCs.
+- Compute MCD between two inputs: audio files, amplitude spectrograms, Mel spectrograms, or MFCCs.
 - Calculate an alignment penalty (PEN) as an additional metric to indicate the extent of alignment applied.
-- Remove pauses from audio files or feature representations (amplitude spectrograms, mel spectrograms, or MFCCs) using a threshold.
+- Remove pauses from audio files or feature representations (amplitude spectrograms, Mel spectrograms, or MFCCs) using a threshold.
 - Align feature representations using either Dynamic Time Warping (DTW) or zero-padding.
 - Experimental results show a moderate negative correlation with naturalness (Spearman: –0.31) and a weak negative correlation with intelligibility (–0.24). For a detailed analysis of parameter configurations and their impact on correlation strength, see the [experiment report](https://github.com/stefantaubert/mel-cepstral-distance/blob/main/experiments/README.md).
 

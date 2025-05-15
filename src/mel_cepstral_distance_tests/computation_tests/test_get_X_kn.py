@@ -4,8 +4,8 @@ from mel_cepstral_distance.computation import get_w_n_m, get_X_kn
 
 
 def get_X_kn_from_paper(X_km: np.ndarray, w_n_m: np.ndarray) -> np.ndarray:
-  """Calculates the energy mel spectrogram (Bel) of the linear amplitude spectrogram
-  returns mel spectrogram with shape (#frames, N)
+  """Calculates the energy Mel spectrogram (Bel) of the linear amplitude spectrogram
+  returns Mel spectrogram with shape (#frames, N)
   """
   # M = n mels
   assert X_km.shape[1] == w_n_m.shape[1], (

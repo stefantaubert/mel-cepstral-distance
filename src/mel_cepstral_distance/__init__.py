@@ -7,13 +7,13 @@ Functions
 ---------
 - `get_amplitude_spectrogram`: Computes the Short-Time Fourier Transform (STFT)
   of an audio signal and returns the amplitude spectrogram.
-- `get_mel_spectrogram`: Converts an amplitude spectrogram to a mel-spectrogram
+- `get_mel_spectrogram`: Converts an amplitude spectrogram to a Mel spectrogram
   using mel filterbanks.
-- `get_mfccs`: Extracts MFCCs from a mel-spectrogram.
+- `get_mfccs`: Extracts MFCCs from a Mel spectrogram.
 - `compare_audio_files`: Compares two audio files by calculating the MCD and
   alignment penalty.
 - `compare_amplitude_spectrograms`: Compares two amplitude spectrograms.
-- `compare_mel_spectrograms`: Compares two mel-spectrograms.
+- `compare_mel_spectrograms`: Compares two Mel spectrograms.
 - `compare_mfccs`: Compares two sets of MFCCs.
 
 The `get_*` functions, while not directly invoked elsewhere in the module, can be used
@@ -38,7 +38,7 @@ Notes
   contain multiple channels, preprocessing is required to convert them to mono.
 - For optimal performance, FFT window lengths should be powers of 2 in samples.
 - Silence removal is applied based on energy thresholds, either in the time domain
-  or at different spectral levels (e.g., mel-spectrogram or MFCCs).
+  or at different spectral levels (e.g., Mel spectrogram or MFCCs).
 - The Mel-Cepstral Distance (MCD) is a commonly used metric for evaluating the
   similarity between two audio signals, particularly in speech synthesis and
   voice conversion tasks.

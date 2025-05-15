@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- MCD calculation for mel-spectrograms via CLI using `from-mel`
+- MCD calculation for Mel spectrograms via CLI using `from-mel`
 - batch processing for `from-mel` via `from-mel-batch`
 - `get_metrics_mels_pairwise`
 - logging to file

@@ -87,8 +87,8 @@ def get_w_n_m(
 
 
 def get_X_kn(X_km: npt.NDArray[np.complex128], w_n_m: npt.NDArray) -> npt.NDArray:
-  """Calculates the energy mel spectrogram (Bel) of the linear amplitude spectrogram
-  returns mel spectrogram with shape (#frames, N)
+  """Calculates the energy Mel spectrogram (Bel) of the linear amplitude spectrogram
+  returns Mel spectrogram with shape (#frames, N)
   """
   assert X_km.shape[1] == w_n_m.shape[1], (
     f"Expected {w_n_m.shape[1]} columns, but got {X_km.shape[1]}"
@@ -103,7 +103,7 @@ def get_X_kn(X_km: npt.NDArray[np.complex128], w_n_m: npt.NDArray) -> npt.NDArra
 
 
 def get_MC_X_ik(X_kn: npt.NDArray, M: int) -> npt.NDArray:
-  """Calculates the mel cepstrum coefficients of the mel spectrogram
+  """Calculates the mel cepstrum coefficients of the Mel spectrogram
   returns mel cepstrum with shape (M, #frames)
   """
   # K: total frame count

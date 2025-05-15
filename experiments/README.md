@@ -81,12 +81,12 @@ Full results are documented in the respective report files (`report.{subjective_
   * Moderate negative Pearson correlation of up to -0.36 for naturalness but weak negative correlation for intelligibility (-0.22). The resulting coefficient suggests a meaningful linear relationship between the objective measure and perceived naturalness.
 - Removing pauses reduced correlation.
 - Upsampling to 96 kHz improved correlation; higher rates offered no additional benefit.
-- Optimal Mel-spectrogram upper frequency limit was half the sampling rate (48 kHz).
+- Optimal Mel spectrogram upper frequency limit was half the sampling rate (48 kHz).
 - Optimal lower frequency limit was 0 Hz.
 - Best Spearman results with 32 ms window length, 64 ms FFT length, and 16 ms hop length.
   * Best Pearson results with 64 ms window length, 128 ms FFT length, and 16 ms hop length.
 - Hanning window slightly outperformed Hamming.
-- DTW alignment of Mel-spectrograms outperformed linear or MFCC alignment.
+- DTW alignment of Mel spectrograms outperformed linear or MFCC alignment.
   * DTW radius had minor impact, recommended >1.
   * Padding severely degraded correlation.
 - 20 Mel bands were optimal.

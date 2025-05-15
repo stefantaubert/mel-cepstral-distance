@@ -1,6 +1,6 @@
 # Systematic analysis of parameter combinations to optimize the correlation between MCD/PEN and MOS ratings
 
-To investigate the correlation between Mel-Cepstral Distance (MCD) and Penalty (PEN) with subjective ratings, 223 experiments were conducted. The main objective was to identify how various parameters influence the computation of MCD and PEN and their correlation strength with subjective assessments.
+To investigate the correlation between Mel-Cepstral Distance (MCD) and Penalty (PEN) with subjective ratings, 230 experiments were conducted. The main objective was to identify how various parameters influence the computation of MCD and PEN and their correlation strength with subjective assessments.
 
 ## Utilization of the LJS-MOS-120 dataset
 

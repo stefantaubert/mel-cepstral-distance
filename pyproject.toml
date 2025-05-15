@@ -151,7 +151,8 @@ deps =
 
 commands =
   mypy
-  ruff check
+  ruff check src/mel_cepstral_distance
+  ruff check src/mel_cepstral_distance_tests
   pytest -n auto \
     --cov=src/mel_cepstral_distance \
     --cov-append \

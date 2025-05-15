@@ -12,9 +12,10 @@
 A Python library for computing the Mel-Cepstral Distance (also known as Mel-Cepstral Distortion, MCD) between two inputs. This implementation is based on the method proposed by Robert F. Kubichek in [*Mel-Cepstral Distance Measure for Objective Speech Quality Assessment*](https://ieeexplore.ieee.org/document/407206).
 
 - Compute MCD between two inputs: audio files, amplitude spectrograms, mel spectrograms, or MFCCs.
+- Calculate an alignment penalty (PEN) as an additional metric to indicate the extent of alignment applied.
 - Remove pauses from audio files or feature representations (amplitude spectrograms, mel spectrograms, or MFCCs) using a threshold.
 - Align feature representations using either Dynamic Time Warping (DTW) or zero-padding.
-- Calculate an alignment penalty as an additional metric to indicate the extent of alignment applied.
+- Experimental results show a moderate negative correlation with naturalness (Spearman: –0.31) and a weak negative correlation with intelligibility (–0.24). For a detailed analysis of parameter configurations and their impact on correlation strength, see the [experiment report](https://github.com/stefantaubert/mel-cepstral-distance/blob/main/experiments/README.md).
 
 ## Getting Started
 
@@ -158,22 +159,21 @@ Where:
 - [11] **MIST-Tacotron** -> Moon, S., Kim, S., & Choi, Y.-H. (2022). MIST-Tacotron: End-to-End Emotional Speech Synthesis Using Mel-Spectrogram Image Style Transfer. IEEE Access, 10, 25455–25463. IEEE Access. https://doi.org/10.1109/ACCESS.2022.3156093
 - [12] Kim, J., Choi, H., Park, J., Hahn, M., Kim, S., & Kim, J.-J. (2018). Korean Singing Voice Synthesis Based on an LSTM Recurrent Neural Network. Interspeech 2018, 1551–1555. https://doi.org/10.21437/Interspeech.2018-1575
 
-#### Default parameters
+### Default parameters
 
 Based on the values in the literature the default parameters were set:
 
-- Hop Length (hop_len): 8ms
+- Hop Length (hop_len): 8 ms
   - Note: should be 1/2 or 1/4 of the window size
-- Window Size (win_len): 32ms
-- FFT Size (n_fft): 32ms
-  - Should match the window size.
+- Window Size (win_len): 32 ms
+- FFT Size (n_fft): 32 ms
   - For faster computation, the sample equivalent should be a power of 2.
 - Window Function (window): Hanning
 - Sampling Rate (sample_rate): is taken from the audio file
-- Min Frequency (fmin): 0Hz
-- Max Frequency (fmax): sampling rate / 2
+- Minimum Frequency (fmin): 0 Hz
+- Maximum Frequency (fmax): sampling rate / 2
   - Cannot exceed half the sampling rate.
-- Num. Mel-Bands ($N$): 20
+- Num. Mel-Bands ($M$): 20
   - Increasing the number will increase the resulting MCD values.
 - $s$: 1
 - $D$: 16
@@ -181,7 +181,36 @@ Based on the values in the literature the default parameters were set:
 - Aligning: DTW
 - Align Target (align_target): MFCC
 - Remove Silence: No
-  - Silence should be removed from Mel spectrograms before computing the MCD, with dataset-specific thresholds.
+  - Silence can be removed from Mel spectrograms before computing the MCD, with dataset-specific thresholds.
+
+### Suggested parameters
+
+Based on the conducted [experiments](https://github.com/stefantaubert/mel-cepstral-distance/blob/main/experiments/README.md), the following parameter settings are recommended to achieve the strongest correlation with subjective ratings:
+
+```
+sample_rate = 96000
+n_fft = 64
+win_len = 32
+hop_len = 16
+window = 'hanning'
+fmin = 0
+fmax = 48000
+M = 20
+s = 1
+D = 13
+align_method = 'dtw'
+align_target = 'mel'
+remove_silence = 'no'
+silence_threshold_A = None
+silence_threshold_B = None
+norm_audio = True
+dtw_radius = 2
+```
+
+Furthermore, combining MCD and PEN using the formula `MCD*(PEN+1)` yield the strongest correlation with subjective ratings, according to the experimental results.
+
+**Note:** To enable meaningful cross-paper comparisons, it is strongly recommended that users of this library—whether adopting it directly or implementing their own version—explicitly report all parameter settings used for feature extraction and distance calculation, as inconsistent or undocumented configurations remain a major issue in the current literature.
+
 
 ## License
 

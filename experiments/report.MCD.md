@@ -248,7 +248,7 @@
 ## Experiment - Sakoe-Chiba radius
 
 - Experimented parameter(s):
-  - dtw_radius = 1, 2, 3, 10, 20, None, 40
+  - dtw_radius = 1, 2, 3, 20, 40, None, 10
 - Results (format = {dtw_radius}):
   - MCD 7.751: 10, 2, 20, 3, 40, None
   - MCD 7.752: 1
@@ -335,16 +335,23 @@
 
 - Experimented parameter(s):
   - n_fft = 16, 32, 64, 128, 256, 512, 1024
-  - win_len = 5, 10, 21, 42, 85, 170, 341
-  - hop_len = 1, 3, 7, 14, 28, 56, 113
+  - win_len = 5, 5.33, 10, 10.67, 21, 21.33, 42, 42.67, 85, 85.33, 170, 170.67, 341, 341.33
+  - hop_len = 1, 1.78, 3, 3.56, 7, 7.11, 14, 14.22, 28, 28.44, 56, 56.89, 113, 113.78
 - Results (format = {n_fft:win_len:hop_len}):
   - MCD 4.359: 16:5:1
+  - MCD 4.455: 16:5.33:1.78
   - MCD 4.539: 32:10:3
+  - MCD 4.579: 32:10.67:3.56
+  - MCD 4.817: 64:21.33:7.11
   - MCD 4.825: 64:21:7
   - MCD 5.216: 128:42:14
+  - MCD 5.225: 128:42.67:14.22
   - MCD 5.729: 256:85:28
+  - MCD 5.753: 256:85.33:28.44
+  - MCD 6.307: 512:170.67:56.89
   - MCD 6.318: 512:170:56
   - MCD 6.649: 1024:341:113
+  - MCD 6.668: 1024:341.33:113.78
 
 ## Experiment - FFT window length, window length and hop length with ratio 4:2:1
 

@@ -4,19 +4,19 @@
 
 | obj_metric      |   mean |   median |
 |-----------------|--------|----------|
-| mcd*(pen+1)     | -0.162 |   -0.172 |
-| mcd*(pen+0.5)   | -0.162 |   -0.168 |
+| mcd*(pen+1)     | -0.162 |   -0.17  |
+| mcd*(pen+0.5)   | -0.161 |   -0.168 |
 | mcd*(pen+2)     | -0.157 |   -0.169 |
 | mcd*(pen+0.25)  | -0.154 |   -0.16  |
-| mcd+pen         | -0.151 |   -0.162 |
-| sqrt(mcd²+pen²) | -0.145 |   -0.157 |
-| mcd             | -0.145 |   -0.157 |
-| mcd*(pen+0.1)   | -0.142 |   -0.147 |
-| mcd-pen         | -0.137 |   -0.152 |
+| mcd+pen         | -0.15  |   -0.162 |
+| sqrt(mcd²+pen²) | -0.144 |   -0.157 |
+| mcd             | -0.144 |   -0.156 |
+| mcd*(pen+0.1)   | -0.141 |   -0.147 |
+| mcd-pen         | -0.136 |   -0.152 |
 | mcd*pen         | -0.126 |   -0.125 |
 | pen*(mcd+1)     | -0.123 |   -0.121 |
-| pen             | -0.095 |   -0.098 |
-| mcd*(pen-1)     |  0.085 |    0.092 |
+| pen             | -0.095 |   -0.097 |
+| mcd*(pen-1)     |  0.084 |    0.092 |
 
 ## Default parameters for experiments
 
@@ -222,7 +222,7 @@
 
 - Experimented parameter(s):
   - remove_silence = mel, no
-  - silence_threshold_A = -4, None, -3.5, -3
+  - silence_threshold_A = -4, -3.5, -3, None
   - silence_threshold_B = -4.5, -4, -3.5, None
 - Results (format = {remove_silence:silence_threshold_A:silence_threshold_B}):
   - Kendall_tau -0.193: no:None:None
@@ -252,7 +252,7 @@
 ## Experiment - Sakoe-Chiba radius
 
 - Experimented parameter(s):
-  - dtw_radius = 1, 2, 3, None, 10, 20, 40
+  - dtw_radius = 1, 2, 3, 10, 20, 40, None
 - Results (format = {dtw_radius}):
   - Kendall_tau -0.194: 1
   - Kendall_tau -0.193: 10, 2, 20, 3, 40, None
@@ -337,16 +337,22 @@
 
 - Experimented parameter(s):
   - n_fft = 16, 32, 64, 128, 256, 512, 1024
-  - win_len = 5, 10, 21, 42, 85, 170, 341
-  - hop_len = 1, 3, 7, 14, 28, 56, 113
+  - win_len = 5, 5.33, 10, 10.67, 21, 21.33, 42, 42.67, 85, 85.33, 170, 170.67, 341, 341.33
+  - hop_len = 1, 1.78, 3, 3.56, 7, 7.11, 14, 14.22, 28, 28.44, 56, 56.89, 113, 113.78
 - Results (format = {n_fft:win_len:hop_len}):
-  - Kendall_tau -0.184: 128:42:14
+  - Kendall_tau -0.184: 128:42:14, 64:21.33:7.11
   - Kendall_tau -0.180: 32:10:3
   - Kendall_tau -0.176: 256:85:28
   - Kendall_tau -0.174: 64:21:7
+  - Kendall_tau -0.172: 128:42.67:14.22
+  - Kendall_tau -0.170: 32:10.67:3.56
+  - Kendall_tau -0.167: 256:85.33:28.44
   - Kendall_tau -0.157: 16:5:1
+  - Kendall_tau -0.143: 16:5.33:1.78
   - Kendall_tau -0.092: 512:170:56
   - Kendall_tau -0.071: 1024:341:113
+  - Kendall_tau -0.065: 512:170.67:56.89
+  - Kendall_tau -0.052: 1024:341.33:113.78
 
 ## Experiment - FFT window length, window length and hop length with ratio 4:2:1
 

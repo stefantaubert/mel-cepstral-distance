@@ -151,3 +151,6 @@ TODO.txt
 *_debug/
 coverage_output.txt
 TODO.md
+experiments/cache_mos.pkl
+experiments/cache.pkl
+experiments/results.ALL.csv

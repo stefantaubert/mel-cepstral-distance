@@ -606,8 +606,8 @@ def get_experiments_n_fft_win_len_hop_len_halfes():
   for val in variations:
     setting = params_proto.copy()
     setting[PARAM_N_FFT] = val
-    setting[PARAM_WIN_LEN] = val // 2
-    setting[PARAM_HOP_LEN] = val // 4
+    setting[PARAM_WIN_LEN] = int(val / 2)
+    setting[PARAM_HOP_LEN] = int(val / 4)
 
     yield setting
 
@@ -649,9 +649,14 @@ def get_experiments_n_fft_win_len_hop_len_thirds():
   for val in variations:
     setting = params_proto.copy()
     setting[PARAM_N_FFT] = val
+    setting[PARAM_WIN_LEN] = val / 3
+    setting[PARAM_HOP_LEN] = val / 9
+    yield setting
+
+    setting = params_proto.copy()
+    setting[PARAM_N_FFT] = val
     setting[PARAM_WIN_LEN] = val // 3
     setting[PARAM_HOP_LEN] = val // 9
-
     yield setting
 
 
@@ -1046,7 +1051,6 @@ def create_analysis():
         ).rename(columns={"algo_b": "comparison"})
         df_merged.drop(columns=["condition"], inplace=True)
 
-        # df_merged.to_csv("/tmp/compare_mcd_mos.csv", index=False)
         # print(df_merged.head())
 
         for algo in ["ALL", "impl", "expl"]:
@@ -1106,12 +1110,12 @@ def create_analysis():
 
   res = pd.DataFrame.from_records(records)
 
-  res.to_csv("experiments/compare.csv", index=False)
+  res.to_csv(EXPERIMENTS_BASE_DIR / "results.csv", index=False)
 
   df_ALL = res[(res["group"] == "ALL")].sort_values("pearson", ascending=True)
   df_ALL.drop(columns=["group"], inplace=True)
 
-  df_ALL.to_csv("experiments/compare.ALL.csv", index=False)
+  df_ALL.to_csv(EXPERIMENTS_BASE_DIR / "results.ALL.csv", index=False)
 
   meta_analysis = {
     "min_pearson": df_ALL["pearson"].min(),
@@ -1148,7 +1152,7 @@ def normalize_str(value: Any) -> str:
 
 def create_correlation_reports():
   df_ALL = pd.read_csv(
-    "experiments/compare.ALL.csv",
+    EXPERIMENTS_BASE_DIR / "results.ALL.csv",
     # na_filter=False,
   )
 
@@ -1293,7 +1297,7 @@ def create_correlation_reports():
 
 
 def create_obj_reports():
-  df_ALL = pd.read_csv(EXPERIMENTS_BASE_DIR / "compare.ALL.csv")
+  df_ALL = pd.read_csv(EXPERIMENTS_BASE_DIR / "results.ALL.csv")
 
   decimal_accuracy = 3
   metrics = ["MCD", "PEN"]

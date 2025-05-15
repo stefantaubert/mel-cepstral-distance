@@ -36,7 +36,9 @@ jobs:
           python -m uv pip install --system .[dev]
 
       - name: Run linters
-        run: ruff check
+        run: |
+          ruff check src/mel_cepstral_distance
+          ruff check src/mel_cepstral_distance_tests
 
       - name: Type checking
         run: mypy

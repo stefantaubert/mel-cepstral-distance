@@ -4,19 +4,19 @@
 
 | obj_metric      |   mean |   median |
 |-----------------|--------|----------|
-| mcd*(pen+1)     | -0.27  |   -0.286 |
-| mcd*(pen+2)     | -0.267 |   -0.285 |
-| mcd*(pen+0.5)   | -0.263 |   -0.275 |
-| mcd+pen         | -0.261 |   -0.279 |
-| sqrt(mcd²+pen²) | -0.253 |   -0.274 |
-| mcd             | -0.251 |   -0.274 |
-| mcd*(pen+0.25)  | -0.245 |   -0.259 |
-| mcd-pen         | -0.239 |   -0.268 |
+| mcd*(pen+1)     | -0.269 |   -0.285 |
+| mcd*(pen+2)     | -0.266 |   -0.285 |
+| mcd*(pen+0.5)   | -0.262 |   -0.275 |
+| mcd+pen         | -0.259 |   -0.278 |
+| sqrt(mcd²+pen²) | -0.251 |   -0.274 |
+| mcd             | -0.25  |   -0.274 |
+| mcd*(pen+0.25)  | -0.244 |   -0.259 |
+| mcd-pen         | -0.238 |   -0.268 |
 | mcd*(pen+0.1)   | -0.221 |   -0.227 |
 | mcd*pen         | -0.195 |   -0.194 |
 | pen*(mcd+1)     | -0.19  |   -0.189 |
 | pen             | -0.143 |   -0.143 |
-| mcd*(pen-1)     |  0.155 |    0.178 |
+| mcd*(pen-1)     |  0.154 |    0.177 |
 
 ## Default parameters for experiments
 
@@ -225,7 +225,7 @@
 - Experimented parameter(s):
   - remove_silence = mel, no
   - silence_threshold_A = -4, -3.5, -3, None
-  - silence_threshold_B = -4.5, -4, -3.5, None
+  - silence_threshold_B = -4.5, None, -4, -3.5
 - Results (format = {remove_silence:silence_threshold_A:silence_threshold_B}):
   - Pearson -0.318: no:None:None
   - Pearson -0.252: mel:-4:-4.5
@@ -340,16 +340,22 @@
 
 - Experimented parameter(s):
   - n_fft = 16, 32, 64, 128, 256, 512, 1024
-  - win_len = 5, 10, 21, 42, 85, 170, 341
-  - hop_len = 1, 3, 7, 14, 28, 56, 113
+  - win_len = 5, 5.33, 10, 10.67, 21, 21.33, 42, 42.67, 85, 85.33, 170, 170.67, 341, 341.33
+  - hop_len = 1, 1.78, 3, 3.56, 7, 7.11, 14, 14.22, 28, 28.44, 56, 56.89, 113, 113.78
 - Results (format = {n_fft:win_len:hop_len}):
   - Pearson -0.300: 128:42:14
+  - Pearson -0.293: 64:21.33:7.11
   - Pearson -0.290: 64:21:7
   - Pearson -0.279: 32:10:3
+  - Pearson -0.278: 128:42.67:14.22
+  - Pearson -0.272: 32:10.67:3.56
   - Pearson -0.267: 256:85:28
   - Pearson -0.252: 16:5:1
+  - Pearson -0.243: 16:5.33:1.78, 256:85.33:28.44
   - Pearson -0.202: 512:170:56
+  - Pearson -0.160: 512:170.67:56.89
   - Pearson -0.130: 1024:341:113
+  - Pearson -0.101: 1024:341.33:113.78
 
 ## Experiment - FFT window length, window length and hop length with ratio 4:2:1
 

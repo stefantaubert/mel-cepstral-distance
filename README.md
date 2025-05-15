@@ -113,7 +113,7 @@ Where:
 - $N$: The total number of frames.
 - $MCD(k)$: The Mel-cepstral distance for the $k$-th frame.
 
-### Alignment penalty during dynamic time warping (DTW)
+### Alignment penalty during Dynamic Time Warping (DTW)
 
 $$
 PEN = 2 - \frac{N_X + N_Y}{N_{XY}}

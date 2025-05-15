@@ -188,13 +188,13 @@ Based on the values in the literature the default parameters were set:
 Based on the conducted [experiments](https://github.com/stefantaubert/mel-cepstral-distance/blob/main/experiments/README.md), the following parameter settings are recommended to achieve the strongest correlation with subjective ratings:
 
 ```
-sample_rate = 96000
-n_fft = 64
-win_len = 32
-hop_len = 16
+sample_rate = 96000 Hz
+n_fft = 64 ms
+win_len = 32 ms
+hop_len = 16 ms
 window = 'hanning'
-fmin = 0
-fmax = 48000
+fmin = 0 Hz
+fmax = 48000 Hz
 M = 20
 s = 1
 D = 13

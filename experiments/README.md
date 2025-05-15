@@ -35,13 +35,13 @@ The impact of varying individual parameters on the numerical values of MCD and P
 Input audio files from the LJ-Speech dataset had a sampling rate of 22050 Hz. Synthesized spectrograms were generated using Tacotron with the following parameters and subsequently converted to audio files using WaveGlow:
 
 ```
-sample_rate = 22050
+sample_rate = 22050 Hz
 n_fft = 1024 samples (= 46.44 ms)
 win_len = 1024 samples (= 46.44 ms)
 hop_len = 256 samples (= 11.61 ms)
 window = 'hanning'
-fmin = 0
-fmax = 8000
+fmin = 0 Hz
+fmax = 8000 Hz
 M = 80
 ```
 
@@ -50,13 +50,13 @@ M = 80
 Standard experimental configurations were based on the following parameters, upscaled to a sampling rate of 96000 Hz, determined optimal through preliminary tests:
 
 ```
-sample_rate = 96000
+sample_rate = 96000 Hz
 n_fft = 128 ms
 win_len = 128 ms
 hop_len = 32 ms
 window = 'hanning'
-fmin = 0
-fmax = 48000
+fmin = 0 Hz
+fmax = 48000 Hz
 M = 20
 s = 1
 D = 16
@@ -97,13 +97,13 @@ Full results are documented in the respective report files (`report.{subjective_
 **Best parameter configuration (Spearman):**
 
 ```
-sample_rate = 96000
-n_fft = 64
-win_len = 32
-hop_len = 16
+sample_rate = 96000 Hz
+n_fft = 64 ms
+win_len = 32 ms
+hop_len = 16 ms
 window = 'hanning'
-fmin = 0
-fmax = 48000
+fmin = 0 Hz
+fmax = 48000 Hz
 M = 20
 s = 1
 D = 13

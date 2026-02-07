@@ -41,6 +41,20 @@ print(f'MCD: {mcd:.2f}, Penalty: {penalty:.4f}')
 # MCD: 7.45, Penalty: 0.1087
 ```
 
+Compare two audio arrays with default parameters:
+
+```py
+import numpy as np
+from mel_cepstral_distance import compare_audio_arrays
+
+mcd, penalty = compare_audio_arrays(
+  np.random.rand(16000),  # first signal
+  np.random.rand(16000),  # second signal
+  16000,  # sampling frequency of first signal
+  16000,  # sampling frequency of second signal
+)
+```
+
 ## Calculation
 
 ### Spectrogram

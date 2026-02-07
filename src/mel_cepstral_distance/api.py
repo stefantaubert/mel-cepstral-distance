@@ -662,7 +662,7 @@ def compare_audio_files(
   dtw_radius: Optional[int] = 10,
 ) -> Tuple[float, float]:
   """
-  Compares two audio signals by computing the mean Mel-Cepstral Distance (MCD) between
+  Compares two audio files by computing the mean Mel-Cepstral Distance (MCD) between
   them. Internally computes amplitude and Mel spectrograms, extracts MFCCs, and aligns
   them for comparison. Silence can optionally be removed before alignment.
 

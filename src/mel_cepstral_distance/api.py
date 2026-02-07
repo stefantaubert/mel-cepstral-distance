@@ -383,6 +383,261 @@ def get_mfccs(
   return MC_X_ik
 
 
+def compare_audio_arrays(
+  signal_A: npt.NDArray,
+  signal_B: npt.NDArray,
+  sr_A: int,
+  sr_B: int,
+  /,
+  *,
+  sample_rate: Optional[int] = None,
+  n_fft: float = 32,
+  win_len: float = 32,
+  hop_len: float = 8,
+  window: Literal["hamming", "hanning"] = "hanning",
+  fmin: int = 0,
+  fmax: Optional[int] = None,
+  M: int = 20,
+  s: int = 1,
+  D: int = 16,
+  aligning: Literal["pad", "dtw"] = "dtw",
+  align_target: Literal["spec", "mel", "mfcc"] = "mfcc",
+  remove_silence: Literal["no", "sig", "spec", "mel", "mfcc"] = "no",
+  silence_threshold_A: Optional[float] = None,
+  silence_threshold_B: Optional[float] = None,
+  norm_audio: bool = True,
+  dtw_radius: Optional[int] = 10,
+) -> Tuple[float, float]:
+  """
+  Compares two audio arrays by computing the mean Mel-Cepstral Distance (MCD) between
+  them. Internally computes amplitude and Mel spectrograms, extracts MFCCs, and aligns
+  them for comparison. Silence can optionally be removed before alignment.
+
+  This is the main entry point for evaluating similarity between two audio arrays in the
+  module.
+
+  Parameters
+  ----------
+  signal_A : npt.NDArray
+      First mono audio array.
+  signal_B : npt.NDArray
+      Second mono audio array.
+  sr_A : int
+      Sample rate of the first audio array.
+  sr_B : int
+      Sample rate of the second audio array.
+  sample_rate : int, optional
+      If specified, both signals are resampled to this rate before processing.
+      Otherwise, the lower of the two input sample rates is used. Must be > 0.
+  n_fft : float, default=32
+      FFT window length in milliseconds. Must be > 0. The corresponding number of
+      samples should be a power of 2 for efficient FFT computation.
+  win_len : float, default=32
+      Window length in milliseconds. Should be equal to `n_fft`. Must be > 0.
+  hop_len : float, default=8
+      Hop length in milliseconds. Must be > 0.
+  window : Literal["hamming", "hanning"], default="hanning"
+      Type of window function used in the STFT.
+  fmin : int, default=0
+      Minimum frequency (in Hz) for mel-band calculation. Must satisfy 0 <= fmin < fmax.
+  fmax : int, optional
+      Maximum frequency (in Hz) for mel-band calculation. If not set, defaults to
+      sample_rate / 2. Must satisfy 0 < fmax <= sample_rate / 2.
+  M : int, default=20
+      Number of mel filterbanks. Must be > 0.
+  s : int, default=1
+      Starting index (inclusive) for MFCCs used in MCD calculation. Must be in [0, D).
+  D : int, default=16
+      Number of MFCC coefficients considered for distance computation.
+      Must satisfy D <= M.
+  aligning : Literal["pad", "dtw"], default="dtw"
+      Alignment strategy. "pad" uses zero-padding; "dtw" uses Dynamic Time Warping. DTW
+      is more accurate but computationally more expensive.
+  align_target : Literal["spec", "mel", "mfcc"], default="mel"
+      Spectral level at which alignment is applied. Determines at which stage
+      silence can be removed.
+  remove_silence : Literal["no", "sig", "spec", "mel", "mfcc"], default="no"
+      Stage at which silence is removed. "sig" applies RMS-based silence removal in the
+      time domain. Other options apply thresholding to spectral frames.
+      Silence is always removed before alignment.
+  silence_threshold_A : float, optional
+      Threshold used to detect silence in `signal_A`, depending on the selected
+      `remove_silence` strategy. For `"sig"`, this is an RMS threshold; for spectral
+      stages, it applies to frame energy or amplitude.
+  silence_threshold_B : float, optional
+      Same as `silence_threshold_A`, but applied to `signal_B`.
+  norm_audio : bool, default=True
+      If True, normalizes both signals to the range [-1, 1] before processing.
+  dtw_radius : int, optional, default=10
+      Sakoe-Chiba radius for DTW alignment. A value of 1 is fastest but less accurate.
+      None allows unrestricted warping but is slowest. A value of 10 is a good
+      compromise between speed and accuracy.
+
+  Returns
+  -------
+  Tuple[float, float]
+      - Mean MCD over all selected coefficients.
+      - Alignment penalty. Returns (nan, nan) if either input is empty or becomes empty
+        due to silence removal.
+
+  Raises
+  ------
+  ValueError
+      If `sample_rate` is not > 0.
+  ValueError
+      If `n_fft` is not > 0 or is not a power of 2 in samples.
+  ValueError
+      If `win_len` is not > 0 or does not match `n_fft`.
+  ValueError
+      If `hop_len` is not > 0.
+  ValueError
+      If `window` is not "hamming" or "hanning".
+  ValueError
+      If `fmin` is not in [0, fmax).
+  ValueError
+      If `fmax` is not in (0, sample_rate / 2].
+  ValueError
+      If `M` is not > 0.
+  ValueError
+      If `D` is not <= `M`.
+  ValueError
+      If `s` is not in [0, D).
+  ValueError
+      If `aligning` is not "pad" or "dtw".
+  ValueError
+      If `align_target` is not "spec", "mel", or "mfcc".
+  ValueError
+      If `remove_silence` is not "no", "sig", "spec", "mel", or "mfcc".
+  ValueError
+      If silence removal is enabled but `silence_threshold_A` or `silence_threshold_B`
+      is not set.
+  ValueError
+      If `dtw_radius` is specified but not >= 1.
+  """
+  if remove_silence not in ["no", "sig", "spec", "mel", "mfcc"]:
+    raise ValueError("remove_silence must be 'no', 'sig', 'spec', 'mel' or 'mfcc'")
+
+  if sample_rate is not None and not sample_rate > 0:
+    raise ValueError("sample_rate must be > 0")
+
+  if not n_fft > 0:
+    raise ValueError("n_fft must be > 0")
+
+  if not win_len > 0:
+    raise ValueError("win_len must be > 0")
+
+  if not hop_len > 0:
+    raise ValueError("hop_len must be > 0")
+
+  if window not in ["hamming", "hanning"]:
+    raise ValueError("window must be 'hamming' or 'hanning'")
+
+  if signal_A.dtype != signal_B.dtype:
+    logger = getLogger(__name__)
+    logger.warning(
+      f"audio A and B have different data types ({signal_A.dtype} != {signal_B.dtype})"
+    )
+
+  if len(signal_A) == 0:
+    logger = getLogger(__name__)
+    logger.warning("audio A is empty")
+    return np.nan, np.nan
+
+  if len(signal_B) == 0:
+    logger = getLogger(__name__)
+    logger.warning("audio B is empty")
+    return np.nan, np.nan
+
+  if sample_rate is None:
+    sample_rate = min(sr_A, sr_B)
+
+  signal_A = resample_if_necessary(signal_A, sr_A, sample_rate)
+  signal_B = resample_if_necessary(signal_B, sr_B, sample_rate)
+
+  n_fft_samples = ms_to_samples(n_fft, sample_rate)
+  n_fft_is_two_power = n_fft_samples & (n_fft_samples - 1) == 0
+
+  if not n_fft_is_two_power:
+    logger = getLogger(__name__)
+    logger.warning(
+      f"n_fft ({n_fft}ms / {n_fft_samples} samples) should "
+      f"be a power of 2 in samples for faster computation"
+    )
+
+  if n_fft != win_len:
+    logger = getLogger(__name__)
+    logger.warning(f"n_fft ({n_fft}ms) should be equal to win_len ({win_len}ms)")
+    if n_fft < win_len:
+      logger.warning(f"truncating windows to n_fft ({n_fft}ms)")
+    else:
+      assert n_fft > win_len
+      logger.warning(f"padding windows to n_fft ({n_fft}ms)")
+
+  if norm_audio:
+    signal_A = norm_audio_signal(signal_A)
+    signal_B = norm_audio_signal(signal_B)
+
+  win_len_samples = ms_to_samples(win_len, sample_rate)
+
+  if remove_silence == "sig":
+    if silence_threshold_A is None:
+      raise ValueError("silence_threshold_A must be set")
+
+    if silence_threshold_B is None:
+      raise ValueError("silence_threshold_B must be set")
+
+    if not silence_threshold_A >= 0:
+      raise ValueError("silence_threshold_A must be greater than or equal to 0 RMS")
+
+    if not silence_threshold_B >= 0:
+      raise ValueError("silence_threshold_B must be greater than or equal to 0 RMS")
+
+    signal_A = remove_silence_rms(
+      signal_A, silence_threshold_A, min_silence_samples=win_len_samples
+    )
+
+    signal_B = remove_silence_rms(
+      signal_B, silence_threshold_B, min_silence_samples=win_len_samples
+    )
+
+    if len(signal_A) == 0:
+      logger = getLogger(__name__)
+      logger.warning("after removing silence, audio A is empty")
+      return np.nan, np.nan
+
+    if len(signal_B) == 0:
+      logger = getLogger(__name__)
+      logger.warning("after removing silence, audio B is empty")
+      return np.nan, np.nan
+
+    remove_silence = "no"
+
+  # STFT - Shape: (#Frames, Bins)
+  hop_len_samples = ms_to_samples(hop_len, sample_rate)
+  X_km_A = get_X_km(signal_A, n_fft_samples, win_len_samples, hop_len_samples, window)
+  X_km_B = get_X_km(signal_B, n_fft_samples, win_len_samples, hop_len_samples, window)
+
+  mean_mcd_over_all_k, res_penalty = compare_amplitude_spectrograms(
+    X_km_A,
+    X_km_B,
+    sample_rate,
+    n_fft,
+    fmin=fmin,
+    fmax=fmax,
+    M=M,
+    s=s,
+    D=D,
+    aligning=aligning,
+    align_target=align_target,
+    remove_silence=remove_silence,
+    silence_threshold_A=silence_threshold_A,
+    silence_threshold_B=silence_threshold_B,
+    dtw_radius=dtw_radius,
+  )
+
+  return mean_mcd_over_all_k, res_penalty
+
+
 def compare_audio_files(
   audio_A: Union[Path, str],
   audio_B: Union[Path, str],
@@ -528,99 +783,19 @@ def compare_audio_files(
   if window not in ["hamming", "hanning"]:
     raise ValueError("window must be 'hamming' or 'hanning'")
 
-  sr1, signalA = wavfile.read(audio_A)
-  sr2, signalB = wavfile.read(audio_B)
+  sr_A, signal_A = wavfile.read(audio_A)
+  sr_B, signal_B = wavfile.read(audio_B)
 
-  if signalA.dtype != signalB.dtype:
-    logger = getLogger(__name__)
-    logger.warning(
-      f"audio A and B have different data types ({signalA.dtype} != {signalB.dtype})"
-    )
-
-  if len(signalA) == 0:
-    logger = getLogger(__name__)
-    logger.warning("audio A is empty")
-    return np.nan, np.nan
-
-  if len(signalB) == 0:
-    logger = getLogger(__name__)
-    logger.warning("audio B is empty")
-    return np.nan, np.nan
-
-  if sample_rate is None:
-    sample_rate = min(sr1, sr2)
-
-  signalA = resample_if_necessary(signalA, sr1, sample_rate)
-  signalB = resample_if_necessary(signalB, sr2, sample_rate)
-
-  n_fft_samples = ms_to_samples(n_fft, sample_rate)
-  n_fft_is_two_power = n_fft_samples & (n_fft_samples - 1) == 0
-
-  if not n_fft_is_two_power:
-    logger = getLogger(__name__)
-    logger.warning(
-      f"n_fft ({n_fft}ms / {n_fft_samples} samples) should "
-      f"be a power of 2 in samples for faster computation"
-    )
-
-  if n_fft != win_len:
-    logger = getLogger(__name__)
-    logger.warning(f"n_fft ({n_fft}ms) should be equal to win_len ({win_len}ms)")
-    if n_fft < win_len:
-      logger.warning(f"truncating windows to n_fft ({n_fft}ms)")
-    else:
-      assert n_fft > win_len
-      logger.warning(f"padding windows to n_fft ({n_fft}ms)")
-
-  if norm_audio:
-    signalA = norm_audio_signal(signalA)
-    signalB = norm_audio_signal(signalB)
-
-  win_len_samples = ms_to_samples(win_len, sample_rate)
-
-  if remove_silence == "sig":
-    if silence_threshold_A is None:
-      raise ValueError("silence_threshold_A must be set")
-
-    if silence_threshold_B is None:
-      raise ValueError("silence_threshold_B must be set")
-
-    if not silence_threshold_A >= 0:
-      raise ValueError("silence_threshold_A must be greater than or equal to 0 RMS")
-
-    if not silence_threshold_B >= 0:
-      raise ValueError("silence_threshold_B must be greater than or equal to 0 RMS")
-
-    signalA = remove_silence_rms(
-      signalA, silence_threshold_A, min_silence_samples=win_len_samples
-    )
-
-    signalB = remove_silence_rms(
-      signalB, silence_threshold_B, min_silence_samples=win_len_samples
-    )
-
-    if len(signalA) == 0:
-      logger = getLogger(__name__)
-      logger.warning("after removing silence, audio A is empty")
-      return np.nan, np.nan
-
-    if len(signalB) == 0:
-      logger = getLogger(__name__)
-      logger.warning("after removing silence, audio B is empty")
-      return np.nan, np.nan
-
-    remove_silence = "no"
-
-  # STFT - Shape: (#Frames, Bins)
-  hop_len_samples = ms_to_samples(hop_len, sample_rate)
-  X_km_A = get_X_km(signalA, n_fft_samples, win_len_samples, hop_len_samples, window)
-  X_km_B = get_X_km(signalB, n_fft_samples, win_len_samples, hop_len_samples, window)
-
-  mean_mcd_over_all_k, res_penalty = compare_amplitude_spectrograms(
-    X_km_A,
-    X_km_B,
-    sample_rate,
-    n_fft,
+  return compare_audio_arrays(
+    signal_A,
+    signal_B,
+    sr_A,
+    sr_B,
+    sample_rate=sample_rate,
+    n_fft=n_fft,
+    win_len=win_len,
+    hop_len=hop_len,
+    window=window,
     fmin=fmin,
     fmax=fmax,
     M=M,
@@ -631,10 +806,9 @@ def compare_audio_files(
     remove_silence=remove_silence,
     silence_threshold_A=silence_threshold_A,
     silence_threshold_B=silence_threshold_B,
+    norm_audio=norm_audio,
     dtw_radius=dtw_radius,
   )
-
-  return mean_mcd_over_all_k, res_penalty
 
 
 def compare_amplitude_spectrograms(
